@@ -1,0 +1,58 @@
+/* ── Base reset & global styles ─────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Calibri, Arial, sans-serif; font-size: 13px; background: #eef0f4; color: #222; }
+
+/* ── Language selector ───────────────────────────────────────────── */
+.lang-selector { position: fixed; top: 12px; right: 12px; z-index: 999; display: flex; flex-direction: column; gap: 5px; }
+.lang-selector.lang-disabled { opacity: 0.5; pointer-events: none; }
+.lang-btn { background: #fff; border: 2px solid #e0e6f0; border-radius: 6px; padding: 4px 12px;
+  font-size: 12px; font-weight: 600; cursor: pointer; transition: .15s; color: #1F3864;
+  font-family: inherit; min-width: 80px; text-align: center; }
+.lang-btn:hover { border-color: #0070C0; background: #f0f6ff; }
+.lang-btn.active { background: #1F3864; color: #fff; border-color: #1F3864; }
+.lang-selector.lang-disabled .lang-btn { cursor: not-allowed; opacity: 0.6; }
+
+/* ── Toast notification ──────────────────────────────────────────── */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: #1F3864; color: #fff; padding: 10px 22px; border-radius: 24px;
+  font-size: 13px; font-weight: 600; opacity: 0; transition: opacity .3s;
+  pointer-events: none; z-index: 2000; }
+.toast.show { opacity: 1; }
+
+/* ── Zoom bar ────────────────────────────────────────────────────── */
+.zoom-bar { position: fixed; bottom: 18px; right: 18px; z-index: 3000;
+  display: flex; align-items: center; gap: 6px;
+  background: #1F3864; border-radius: 20px; padding: 5px 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.3); }
+.zoom-bar button { background: none; border: none; color: #fff; font-size: 15px;
+  font-weight: 700; cursor: pointer; width: 24px; line-height: 1;
+  border-radius: 4px; padding: 2px 0; }
+.zoom-bar button:hover { background: rgba(255,255,255,.2); }
+.zoom-bar span { color: #fff; font-size: 11px; font-weight: 600;
+  min-width: 34px; text-align: center; }
+
+/* ── Shared button styles ────────────────────────────────────────── */
+.btn { border: none; border-radius: 7px; padding: 9px 20px; font-size: 13px;
+  font-weight: 700; cursor: pointer; font-family: inherit; transition: .15s; }
+.btn-pri { background: #1F3864; color: #fff; }
+.btn-pri:hover { background: #16305a; }
+.btn-sec { background: #e8eaf0; color: #333; }
+.btn-sec:hover { background: #d8dae4; }
+.btn-link { background: none; color: #999; font-size: 11px; font-weight: 400;
+  text-decoration: underline; padding: 0; cursor: pointer; border: none;
+  font-family: inherit; }
+.btn-link:hover { color: #444; }
+
+/* ── Mobile responsive ───────────────────────────────────────────── */
+@media (max-width: 800px) {
+  .cards { grid-template-columns: 1fr; }
+  .type-cards { grid-template-columns: 1fr; }
+  .row2, .row3 { grid-template-columns: 1fr; }
+  .radios { flex-direction: column; }
+  .tbl { min-width: 520px; }
+  .main-hdr { flex-direction: column; align-items: flex-start; }
+  .wiz-card { border-radius: 0; }
+  .wiz-overlay { padding: 0; }
+  .page { padding: 0 0 40px; }
+  .alt-guide-row { font-size: 11px; }
+}

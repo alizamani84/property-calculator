@@ -1,0 +1,16 @@
+{
+  "name": "swedish-property-calculator",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "VITE_ENTRY=calculator vite build && VITE_ENTRY=methodology vite build",
+    "build:calc": "VITE_ENTRY=calculator vite build",
+    "build:method": "VITE_ENTRY=methodology vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "vite-plugin-singlefile": "^2.0.0"
+  }
+}

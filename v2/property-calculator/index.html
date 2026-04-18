@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swedish Property Investment Calculator</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231F3864' width='100' height='100'/><path d='M50 15 L75 40 L72 40 L72 70 Q72 75 67 75 L33 75 Q28 75 28 70 L28 40 L25 40 Z' fill='%23fff' stroke='%231F3864' stroke-width='2'/><rect x='35' y='45' width='12' height='15' fill='%231F3864'/><rect x='53' y='45' width='12' height='15' fill='%231F3864'/><rect x='44' y='60' width='10' height='10' fill='%231F3864'/></svg>">
+<link rel="stylesheet" href="src/styles/base.css">
+<link rel="stylesheet" href="src/styles/wizard.css">
+<link rel="stylesheet" href="src/styles/results.css">
+<link rel="stylesheet" href="src/styles/components.css">
+</head>
+<body>
+
+<!-- Language selector -->
+<div class="lang-selector" id="langSelector">
+  <button class="lang-btn active" id="lang-en" data-lang="en" onclick="window.setLang('en')">English</button>
+  <button class="lang-btn" id="lang-sv" data-lang="sv" onclick="window.setLang('sv')">Svenska</button>
+  <button class="lang-btn" id="lang-fa" data-lang="fa" onclick="window.setLang('fa')">فارسی</button>
+</div>
+
+<!-- ══════════════════ WIZARD ═══════════════════════════════════════ -->
+<div class="wiz-overlay" id="wizOverlay">
+<div class="wiz-card">
+
+<div class="wiz-header">
+  <div class="sub">Swedish Property Investment Calculator</div>
+  <h1 id="wizTitle">Welcome</h1>
+  <button class="wiz-close-btn" id="wizCloseBtn" onclick="window.closeWizDiscard()" title="Close without saving changes">✕</button>
+</div>
+
+<div class="wiz-prog" id="wizProg" style="display:none">
+  <div class="pd" id="pd1" onclick="window.wizGoTo(1)" title="Step 1: Property type">1</div><div class="pl" id="pl1"></div>
+  <div class="pd" id="pd2" onclick="window.wizGoTo(2)" title="Step 2: Property details">2</div><div class="pl" id="pl2"></div>
+  <div class="pd" id="pd3" onclick="window.wizGoTo(3)" title="Step 3: Financing">3</div><div class="pl" id="pl3"></div>
+  <div class="pd" id="pd4" onclick="window.wizGoTo(4)" title="Step 4: Monthly costs">4</div><div class="pl" id="pl4"></div>
+  <div class="pd" id="pd5" onclick="window.wizGoTo(5)" title="Step 5: Rental income">5</div><div class="pl" id="pl5"></div>
+  <div class="pd" id="pd6" onclick="window.wizGoTo(6)" title="Step 6: Review &amp; calculate">6</div>
+</div>
+
+<div class="wiz-body">
+
+<!-- STEP 0: Welcome -->
+<div class="wiz-step active" id="wstep-0">
+  <h2>Welcome 🏠</h2>
+  <div class="step-desc">Compare financing alternatives for Swedish properties — ägarlägenhet, bostadsrätt, and hus/villa. Monthly take-home, ROI, rental tax, and more. All Swedish rules built in.</div>
+
+  <div id="lastSessionBanner" style="display:none;margin-bottom:10px"></div>
+
+  <div class="wsep" data-i18n="recentCalcs">Recent calculations</div>
+  <div id="savesList"></div>
+
+  <div class="wsep" data-i18n="importExport">Import / Export</div>
+  <div class="file-row">
+    <button class="file-btn" onclick="document.getElementById('fileInput').click()" data-i18n="importJson">
+      📥 Import (.json)
+    </button>
+    <button class="file-btn" onclick="window.openDownloadModal()" data-i18n="exportJson">
+      📤 Export (.json)
+    </button>
+    <input type="file" id="fileInput" accept=".json" onchange="window.loadFromFile(event)">
+  </div>
+  <div style="font-size:11px;color:#aaa;margin-top:8px" data-i18n="importPrevious">Import previously downloaded calculation files or export your current work</div>
+
+  <div style="margin-top:16px;padding-top:16px;border-top:1px solid #eee;font-size:11px;text-align:center">
+    <a href="Property_Calculator_Methodology_v2.html" target="_blank" style="color:#0070C0;text-decoration:none;font-weight:500" data-i18n="methodology">📖 Methodology &amp; formulas</a>
+  </div>
+</div>
+
+<!-- STEP 1: Property Type -->
+<div class="wiz-step" id="wstep-1">
+  <h2 data-i18n="whatType">What type of property are you buying?</h2>
+  <div class="step-desc" data-i18n="typeExplain">The property type determines which costs, taxes, and rules apply.</div>
+  <div class="type-cards">
+    <div class="tc" id="tc-agarlagenhet" onclick="window.selType('agarlagenhet')">
+      <div class="tc-icon">🏢</div>
+      <div class="tc-name">Ägarlägenhet</div>
+      <div class="tc-sub">You own the unit as real property (fastighet) — like a house.</div>
+    </div>
+    <div class="tc" id="tc-bostadsratt" onclick="window.selType('bostadsratt')">
+      <div class="tc-icon">🏘️</div>
+      <div class="tc-name">Bostadsrätt</div>
+      <div class="tc-sub">Co-op apartment — BRF monthly fee, no lagfart or pantbrev.</div>
+    </div>
+    <div class="tc" id="tc-hus" onclick="window.selType('hus')">
+      <div class="tc-icon">🏡</div>
+      <div class="tc-name">Villa / Radhus / Kedjehus / Parhus</div>
+      <div class="tc-sub">Villa, radhus, kedjehus, parhus — individual äganderätt with fastighetsavgift.</div>
+    </div>
+  </div>
+  <div class="unsup-msg" id="unsupMsg" style="display:none"></div>
+  <div class="wiz-err" id="err1">Please select a property type to continue.</div>
+</div>
+
+<!-- STEP 2: Property Details -->
+<div class="wiz-step" id="wstep-2">
+  <h2>Property Details</h2>
+  <div class="step-desc">Give this property a name and add listing links for easy reference.</div>
+
+  <!-- URL Import -->
+  <div class="url-import-box">
+    <div class="url-import-label">🔗 Import from listing URL <span class="opt">(Hemnet, Booli, broker)</span></div>
+    <div class="url-import-row">
+      <input type="url" id="url-import-input" placeholder="https://www.hemnet.se/bostad/…" autocomplete="off">
+      <button class="url-import-btn" onclick="window.importFromUrl()">Import</button>
+    </div>
+    <div class="url-import-status" id="url-import-status"></div>
+  </div>
+
+  <div class="fg" style="margin-top:12px">
+    <label>Property name or address <span class="opt">(optional)</span></label>
+    <input type="text" id="w-name" placeholder="e.g. Särimnervägen 3, Odenslunda">
+  </div>
+
+  <div class="wsep">Property links <span style="font-weight:400;color:#aaa">(optional)</span></div>
+  <div class="step-desc" style="margin-bottom:10px">Add listing or broker links — they open directly from the results view.</div>
+  <div id="linksList"></div>
+  <button class="add-link-btn" onclick="window.addLink()">＋ Add link</button>
+</div>
+
+<!-- STEP 3: Financing & Purchase Costs -->
+<div class="wiz-step" id="wstep-3">
+  <h2>Financing &amp; Purchase Costs</h2>
+  <div class="step-desc">Enter the purchase price, your mortgage, and any property-specific details. One-time costs are calculated automatically.</div>
+
+  <!-- Purchase price + type-specific -->
+  <div class="wsep">Purchase price</div>
+  <div class="row2">
+    <div class="fg">
+      <label>Purchase price (SEK)</label>
+      <input type="number" id="w-price" placeholder="e.g. 4 995 000" step="5000" min="0" oninput="window.onPriceChange()">
+    </div>
+    <div class="fg" id="fastighetsskatt-fg">
+      <label>Fastighetsavgift exemption</label>
+      <div class="radios">
+        <div class="ro selected" id="ro-nb-yes" onclick="window.setR('newbuild','yes')">
+          <div class="rdot"></div>
+          <div><div class="rlbl">Exempt</div>
+          <div class="rsub">First 15 yrs — new ägarlägenheter (värdeår ≥ 2011)</div></div>
+        </div>
+        <div class="ro" id="ro-nb-no" onclick="window.setR('newbuild','no')">
+          <div class="rdot"></div>
+          <div><div class="rlbl">Not exempt</div>
+          <div class="rsub">0.75% of taxeringsvärde, capped at 10 425 kr/yr</div></div>
+        </div>
+      </div>
+      <div class="help">Ägarlägenheter are taxed as fastighetsavgift (same as småhus): 0.75% of taxeringsvärde, capped at 10 425 kr/yr (2026). New builds (värdeår 2011 or later) are fully exempt for the first 15 years.</div>
+    </div>
+    <div class="fg" id="br-no-fastighetsskatt-fg" style="display:none">
+      <label>Fastighetsskatt</label>
+      <div style="background:#e8f5e9;border:1.5px solid #a5d6a7;border-radius:6px;padding:8px 12px;font-size:12px;color:#1a5c1a;">
+        ✅ <strong>Not applicable</strong> — BRF property tax is included in månadsavgiften.
+      </div>
+    </div>
+    <div class="fg" id="hus-fastighetsavgift-fg" style="display:none">
+      <label>Fastighetsavgift</label>
+      <div id="hus-fa-live-box" style="background:#f0f5ff;border:1.5px solid #b8cce8;border-radius:6px;padding:8px 12px;font-size:12px;color:#1a3c6a;">
+        📐 Enter taxeringsvärde below — fastighetsavgift calculated automatically (cap: 10 425 kr/yr).
+      </div>
+    </div>
+  </div>
+
+  <!-- Hus: taxeringsvärde + existing pantbrev -->
+  <div id="hus-details-section" style="display:none">
+    <div class="wsep">Hus/Villa — Fastighetsavgift &amp; Pantbrev</div>
+    <div class="row2">
+      <div class="fg">
+        <label>Taxeringsvärde (SEK)</label>
+        <input type="number" id="w-taxvarde" placeholder="e.g. 4 448 000" step="50000" min="0" oninput="window.updateHusPlaceholders(); window.updateOnetimeSummary()">
+        <div class="help">Used to calculate fastighetsavgift: min(taxeringsvärde × 0.75%, 10 425 kr/yr) for 2026. Find on Skatteverket or Lantmäteriet.</div>
+      </div>
+      <div class="fg">
+        <label>Existing pantbrev on property (SEK) <span class="opt">(optional)</span></label>
+        <input type="number" id="w-existing-pantbrev" placeholder="0" step="50000" min="0" oninput="window.updateHusPlaceholders(); window.updateOnetimeSummary()">
+        <div class="help">Enter 0 for new builds or if unknown. For resold properties, existing pantbrev reduce new pantbrev cost — only the gap above them requires new pantbrev at 2% + 375 kr.</div>
+      </div>
+    </div>
+    <div id="hus-pantbrev-guide" style="display:none;background:#f0f5ff;border:1.5px solid #b8cce8;border-radius:8px;padding:10px 14px;font-size:12px;margin-top:4px"></div>
+  </div>
+
+  <!-- Ägarlägenhet: existing pantbrev only -->
+  <div id="agl-pantbrev-section" style="display:none">
+    <div class="wsep">Ägarlägenhet — Pantbrev</div>
+    <div class="row2">
+      <div class="fg">
+        <label>Existing pantbrev on property (SEK) <span class="opt">(optional)</span></label>
+        <input type="number" id="w-existing-pantbrev-agl" placeholder="0" step="50000" min="0" oninput="window.updateOnetimeSummary()">
+        <div class="help">Ägarlägenheter are registered fastigheter — existing pantbrev transfer to the buyer automatically. Only the gap above existing pantbrev incurs new stamp duty at 2% + 375 kr.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bostadsrätt one-time purchase costs -->
+  <div id="br-onetime-section" style="display:none">
+    <div class="wsep">BRF purchase fees</div>
+    <div class="row2">
+      <div class="fg">
+        <label>Pantsättningsavgift (SEK) <span class="opt">(optional)</span></label>
+        <input type="number" id="w-pantsattning" placeholder="e.g. 500" step="100" min="0" oninput="window.updateOnetimeSummary()">
+        <div class="help">Fee for registering a mortgage pledge in the BRF register. Typically a few hundred kr.</div>
+      </div>
+      <div class="fg">
+        <label>Överlåtelseavgift (SEK) <span class="opt">(optional)</span></label>
+        <input type="number" id="w-overlatelse" placeholder="e.g. 5 000" step="100" min="0" oninput="window.updateOnetimeSummary()">
+        <div class="help">Transfer fee paid to the BRF at purchase. Check the BRF's fee schedule.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Primary mortgage -->
+  <div class="wsep">Your mortgage — Financing Alt. 1</div>
+  <div class="loan-card">
+    <div class="row2">
+      <div class="fg">
+        <label>Down payment / Kontantinsats (SEK)</label>
+        <input type="number" id="w-dp" placeholder="min. 10% of price" step="50000" min="0" oninput="window.onDpChange()">
+        <div class="help">Minimum 10% of purchase price (2026 bolånetak: 90% LTV max).</div>
+      </div>
+      <div class="fg">
+        <label>Interest rate — new mortgage (% / yr)</label>
+        <input type="number" id="w-rate" placeholder="e.g. 2.7" step="0.1" min="0" max="20">
+      </div>
+    </div>
+    <div class="fg" style="max-width:320px">
+      <label>Amortization — new mortgage (% / yr) <span class="opt">auto-calculated</span></label>
+      <input type="number" id="w-amor" placeholder="Enter down payment above" step="0.5" min="0" max="10">
+      <div class="help" id="amor1-help">Set automatically from LTV (2026 rules): &lt;50% → 0%, 50–70% → 1%, &gt;70% → 2%.</div>
+    </div>
+    <div class="alt-guide" id="alt1guide" style="display:none"></div>
+  </div>
+
+  <!-- One-time costs summary -->
+  <div class="wsep">What you need at purchase</div>
+  <div class="ots-box" id="onetime-box">
+    <div class="ots-row" id="ots-dp-row">
+      <span class="ots-lbl">Down payment / Kontantinsats</span>
+      <span class="ots-val" id="ots-dp">—</span>
+    </div>
+    <div class="ots-row" id="ots-lag-row">
+      <span class="ots-lbl" id="ots-lag-lbl">Lagfart (1.5% of price)</span>
+      <span class="ots-val" id="ots-lag">—</span>
+    </div>
+    <div class="ots-row" id="ots-pant-row">
+      <span class="ots-lbl" id="ots-pant-lbl">Pantbrev (2% of mortgage)</span>
+      <span class="ots-val" id="ots-pant">—</span>
+    </div>
+    <div class="ots-row" id="ots-br-row" style="display:none">
+      <span class="ots-lbl">BRF pantsättning + överlåtelse</span>
+      <span class="ots-val" id="ots-br">—</span>
+    </div>
+    <div class="ots-total">
+      <span>Total cash needed at purchase</span>
+      <span id="ots-total">—</span>
+    </div>
+  </div>
+  <div style="text-align:right;margin-top:4px">
+    <button class="ots-override-btn" id="ots-override-btn" onclick="window.toggleOnetimeOverrides()">⚙️ Override calculated values</button>
+  </div>
+
+  <!-- One-time cost overrides (hidden by default) -->
+  <div id="onetime-overrides" style="display:none;margin-top:10px;padding:12px;background:#fff8f0;border:1.5px solid #f5c18a;border-radius:8px">
+    <div style="font-size:11px;color:#8a5a00;margin-bottom:8px;font-weight:600">⚙️ Override — leave blank to use automatic formula</div>
+    <div id="agl-onetime-section">
+      <div class="row2">
+        <div class="fg">
+          <label>Lagfart override (SEK) <span class="opt">optional</span></label>
+          <input type="number" id="w-lag" placeholder="leave blank for formula" step="500" min="0" oninput="window.updateOneCostsPlaceholders(); window.updateOnetimeSummary()">
+          <div class="help" id="lag-help">Standard: 1.5% of price (+825 kr for hus). Leave blank to use formula.</div>
+        </div>
+        <div class="fg">
+          <label>Pantbrev — Financing Alt. 1 (SEK) <span class="opt">optional</span></label>
+          <input type="number" id="w-pant1" placeholder="leave blank for formula" step="500" min="0" oninput="window.updateOneCostsPlaceholders(); window.updateOnetimeSummary()">
+          <div class="help" id="pant1-help">Standard: 2% of new mortgage. Leave blank to use formula.</div>
+        </div>
+      </div>
+      <div class="row2" id="pant23-row" style="display:none">
+        <div class="fg" id="pant2-fg" style="display:none">
+          <label>Pantbrev — Financing Alt. 2 (SEK) <span class="opt">optional</span></label>
+          <input type="number" id="w-pant2" placeholder="leave blank for formula" step="500" min="0">
+          <div class="help" id="pant2-help">Standard: 2% of new bank loan in Financing Alt. 2.</div>
+        </div>
+        <div class="fg" id="pant3-fg" style="display:none">
+          <label>Pantbrev — Financing Alt. 3 (SEK) <span class="opt">optional</span></label>
+          <input type="number" id="w-pant3" placeholder="leave blank for formula" step="500" min="0">
+          <div class="help" id="pant3-help">Standard: 2% of new bank loan in Financing Alt. 3.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alternative scenarios -->
+  <div class="wsep">Alternative financing <span style="font-weight:400;color:#aaa">(optional — add if you have an existing apartment)</span></div>
+  <div class="step-desc" style="margin-bottom:12px">If you can borrow against an existing apartment to cover part of the purchase, add a financing alternative to compare. Financing Alt. 2 uses a large top-up (higher amortization); Financing Alt. 3 uses a smaller amount to stay below 50% LTV.</div>
+
+  <!-- Alt 2 accordion -->
+  <div class="alt-acc" id="acc2">
+    <div class="alt-acc-hdr" onclick="window.toggleAcc(2)">
+      <div class="alt-acc-title">
+        <div class="alt-dot a2"></div>
+        <div>
+          <div class="alt-acc-name">Financing Alt. 2 — Large top-up (LTV &gt; 70%)</div>
+          <div class="alt-acc-sub">Borrow the remaining price from existing apartment → 2%/yr amortization</div>
+        </div>
+      </div>
+      <div class="alt-toggle">
+        <span class="alt-badge not-added" id="badge2">Not added</span>
+        <button class="alt-btn add" id="altbtn2" onclick="event.stopPropagation();window.toggleAlt(2)">Add Alternative 2</button>
+      </div>
+    </div>
+    <div class="alt-body" id="altbody2">
+      <div class="wsep" style="margin-top:0">Your existing apartment</div>
+      <div class="row2">
+        <div class="fg">
+          <label>Market value of existing apartment (SEK)</label>
+          <input type="number" id="w-aptval2" placeholder="e.g. 4 000 000" step="50000" min="0" oninput="window.updateAltCalc(2)">
+          <div class="help">Current estimated market value — used to calculate LTV and amortization requirement.</div>
+        </div>
+        <div class="fg">
+          <label>Current outstanding loan on it (SEK)</label>
+          <input type="number" id="w-aptloan2" placeholder="e.g. 1 500 000" step="50000" min="0" oninput="window.updateAltCalc(2)">
+          <div class="help">Remaining mortgage balance before the top-up.</div>
+        </div>
+      </div>
+      <div class="alt-guide" id="altguide2" style="display:none"></div>
+      <div class="wsep">Top-up details</div>
+      <div class="row2">
+        <div class="fg">
+          <label>Extra loan amount to borrow (SEK)</label>
+          <input type="number" id="w-extra2" placeholder="Auto: price − down payment" step="50000" min="0" oninput="window.updateAltCalc(2)">
+          <div class="help">How much extra loan you take from your existing apartment.</div>
+        </div>
+        <div class="fg">
+          <label>Interest rate — existing loan top-up (% / yr)</label>
+          <input type="number" id="w-erate2" placeholder="e.g. 2.5" step="0.1" min="0" max="20">
+        </div>
+      </div>
+      <div class="fg" style="max-width:320px">
+        <label>Amortization on top-up (% / yr) <span class="opt">auto-calculated</span></label>
+        <input type="number" id="w-eamor2" placeholder="Enter apartment details above" step="0.5" min="0" max="10">
+        <div class="help" id="eamor2-help">Auto-calculated from new LTV (2026 rules).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alt 3 accordion -->
+  <div class="alt-acc" id="acc3">
+    <div class="alt-acc-hdr" onclick="window.toggleAcc(3)">
+      <div class="alt-acc-title">
+        <div class="alt-dot a3"></div>
+        <div>
+          <div class="alt-acc-name">Financing Alt. 3 — Small top-up (LTV &lt; 50%)</div>
+          <div class="alt-acc-sub">Borrow a smaller amount to stay below 50% LTV → no mandatory amortization</div>
+        </div>
+      </div>
+      <div class="alt-toggle">
+        <span class="alt-badge not-added" id="badge3">Not added</span>
+        <button class="alt-btn add" id="altbtn3" onclick="event.stopPropagation();window.toggleAlt(3)">Add Alternative 3</button>
+      </div>
+    </div>
+    <div class="alt-body" id="altbody3">
+      <div class="wsep" style="margin-top:0">Your existing apartment</div>
+      <div class="row2">
+        <div class="fg">
+          <label>Market value of existing apartment (SEK)</label>
+          <input type="number" id="w-aptval3" placeholder="e.g. 4 000 000" step="50000" min="0" oninput="window.updateAltCalc(3)">
+        </div>
+        <div class="fg">
+          <label>Current outstanding loan on it (SEK)</label>
+          <input type="number" id="w-aptloan3" placeholder="e.g. 1 500 000" step="50000" min="0" oninput="window.updateAltCalc(3)">
+        </div>
+      </div>
+      <div class="alt-guide" id="altguide3" style="display:none"></div>
+      <div class="wsep">Top-up details</div>
+      <div class="row2">
+        <div class="fg">
+          <label>Extra loan amount to borrow (SEK)</label>
+          <input type="number" id="w-extra3" placeholder="e.g. 500 000" step="50000" min="0" oninput="window.updateAltCalc(3)">
+          <div class="help">Keep this small to stay below 50% LTV and avoid mandatory amortization.</div>
+        </div>
+        <div class="fg">
+          <label>Interest rate — existing loan top-up (% / yr)</label>
+          <input type="number" id="w-erate3" placeholder="e.g. 2.5" step="0.1" min="0" max="20">
+        </div>
+      </div>
+      <div class="fg" style="max-width:320px">
+        <label>Amortization on top-up (% / yr) <span class="opt">auto-calculated</span></label>
+        <input type="number" id="w-eamor3" placeholder="Enter apartment details above" step="0.5" min="0" max="10">
+        <div class="help" id="eamor3-help">Auto-calculated from new LTV (2026 rules).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BR financing note -->
+  <div id="br-financing-note" style="display:none;margin-top:14px">
+    <div style="background:#e8f3ff;border:1.5px solid #a0c4e8;border-radius:8px;padding:12px 14px;font-size:12px;color:#1a3a6a;line-height:1.6">
+      ℹ️ <strong>Bostadsrätt:</strong> No lagfart or pantbrev. One-time BRF fees (pantsättning, överlåtelse) were entered above.
+    </div>
+  </div>
+
+  <div class="wiz-err" id="err3">Please enter a valid purchase price, down payment, and interest rate.</div>
+</div>
+
+<!-- STEP 4: Monthly Costs -->
+<div class="wiz-step" id="wstep-4">
+  <h2>Monthly Ownership Costs</h2>
+  <div class="step-desc" id="step3-desc">Your recurring monthly costs as owner — only enter costs you will actually pay.</div>
+
+  <!-- Ägarlägenhet: GA fee -->
+  <div id="ga-section">
+    <div class="wsep">Samfällighetsavgift (GA)</div>
+    <div class="fg">
+      <label>GA — Monthly association fee (SEK/mth)</label>
+      <input type="number" id="w-ga" placeholder="e.g. 1 434" step="50" min="0">
+      <div class="help">Monthly fee for shared building costs and common areas.</div>
+    </div>
+  </div>
+
+  <!-- Hus/Villa: annual driftkostnad -->
+  <div id="hus-monthly-section" style="display:none">
+    <div class="wsep">Driftkostnad — Annual running costs</div>
+    <div class="fg">
+      <label>Driftkostnad per year (SEK/år)</label>
+      <input type="number" id="w-hus-drift" placeholder="e.g. 48 200" step="1000" min="0">
+      <div class="help">Total annual running costs: heating, electricity, water, waste, insurance, maintenance reserve, etc. Divided by 12 automatically.</div>
+    </div>
+  </div>
+
+  <!-- Bostadsrätt: månadsavgift + driftkostnad -->
+  <div id="br-monthly-section" style="display:none">
+    <div class="wsep">BRF månadsavgift</div>
+    <div class="row2">
+      <div class="fg">
+        <label>Månadsavgift — BRF monthly fee (SEK/mth)</label>
+        <input type="number" id="w-manavgift" placeholder="e.g. 3 500" step="50" min="0">
+        <div class="help">Monthly fee to the BRF. Check the BRF's årsredovisning.</div>
+      </div>
+      <div class="fg">
+        <label>Extra costs not in månadsavgift (SEK/mth) <span class="opt">(optional)</span></label>
+        <input type="number" id="w-driftkostnad" placeholder="0" step="50" min="0">
+        <div class="help">Costs billed separately — e.g. electricity, parking, broadband.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wsep" id="util-sep">Individual costs <span style="font-weight:400;color:#aaa" id="util-sep-note">— enter 0 if already included above</span></div>
+  <div style="font-size:12px;color:#888;margin-bottom:8px;line-height:1.5" id="util-note-hint">Only fill in costs NOT already covered by the main fee above.</div>
+  <div class="row2">
+    <div class="fg">
+      <label>Insurance — Försäkring (SEK/mth) <span class="opt">(optional)</span></label>
+      <input type="number" id="w-ins" placeholder="0" step="10" min="0">
+    </div>
+    <div class="fg">
+      <label>Water / Vatten (SEK/mth) <span class="opt">(optional)</span></label>
+      <input type="number" id="w-water" placeholder="0" step="10" min="0">
+    </div>
+    <div class="fg">
+      <label>Electricity / El (SEK/mth) <span class="opt">(optional)</span></label>
+      <input type="number" id="w-el" placeholder="0" step="10" min="0">
+    </div>
+    <div class="fg">
+      <label>Heating / Värme (SEK/mth) <span class="opt">(optional)</span></label>
+      <input type="number" id="w-heat" placeholder="0" step="10" min="0">
+    </div>
+    <div class="fg">
+      <label>Other / Övrigt (SEK/mth) <span class="opt">(optional)</span></label>
+      <input type="number" id="w-other" placeholder="0" step="10" min="0">
+    </div>
+  </div>
+  <div class="wiz-err" id="err4">Please enter the required fee (enter 0 if none).</div>
+</div>
+
+<!-- STEP 5: Rental Income -->
+<div class="wiz-step" id="wstep-5">
+  <h2>Rental Income</h2>
+  <div class="step-desc">What will you charge your tenant each month?</div>
+
+  <div class="row2">
+    <div class="fg">
+      <label>Monthly rent — Hyra (SEK/mth)</label>
+      <input type="number" id="w-rent" placeholder="e.g. 17 000" step="500" min="0">
+      <div class="help">Base monthly rent excluding utility reimbursement.</div>
+    </div>
+    <div class="fg">
+      <label>Utility reimbursement from tenant (SEK/mth) <span class="opt">(optional)</span></label>
+      <input type="number" id="w-util" placeholder="0" step="50" min="0">
+      <div class="help">Extra monthly amount the tenant pays for utilities on top of rent. Treated as taxable rental income.</div>
+    </div>
+  </div>
+
+  <!-- Bostadsrätt only: andrahandsuthyrning avgift -->
+  <div id="br-andrahand-section" style="display:none">
+    <div class="wsep">BRF subletting fee</div>
+    <div class="fg">
+      <label>Andrahandsuthyrning avgift (SEK/yr) <span class="opt">(bostadsrätt)</span></label>
+      <input type="number" id="w-andrahand" placeholder="5 880" step="100" min="0">
+      <div class="help">Annual fee to the BRF for subletting permission. Default: 5 880 kr/yr (490 kr/mth).</div>
+    </div>
+  </div>
+
+  <!-- Advanced return analysis inputs -->
+  <div class="wsep" style="margin-top:20px">Optional: Advanced Return Analysis</div>
+  <div style="font-size:12px;color:#888;margin-bottom:10px;line-height:1.5">Fill these to unlock extra rows in Section 5 — comparing your rental return against alternative uses of your capital.</div>
+  <div class="row2">
+    <div class="fg">
+      <label>Alternative investment return (% / yr) <span class="opt">(optional)</span></label>
+      <input type="number" id="w-altRate" placeholder="e.g. 7" step="0.5" min="0" max="30">
+      <div class="help">What you could earn by investing the same capital in index funds instead. Swedish equity market historical average: ~7%/yr.</div>
+    </div>
+    <div class="fg">
+      <label>Expected annual appreciation (% / yr) <span class="opt">(optional)</span></label>
+      <input type="number" id="w-appRate" placeholder="e.g. 3" step="0.5" min="0" max="20">
+      <div class="help">Expected annual property value increase. Swedish cities have historically averaged 3–5%/yr.</div>
+    </div>
+  </div>
+
+  <div class="wiz-err" id="err5">Please enter the monthly rent.</div>
+</div>
+
+<!-- STEP 6: Review -->
+<div class="wiz-step" id="wstep-6">
+  <h2>Review &amp; Calculate</h2>
+  <div class="step-desc">Check everything before calculating. Go back to change any value.</div>
+  <div id="rvContent"></div>
+  <div class="wsep">Save this calculation</div>
+  <div class="row2">
+    <div class="fg">
+      <label>Calculation name</label>
+      <input type="text" id="w-savename" placeholder="e.g. Transgatan 2 — April 2026">
+    </div>
+    <div class="fg" style="display:flex;align-items:flex-end;padding-bottom:1px">
+      <div style="font-size:11px;color:#888;line-height:1.5">
+        Saved to browser storage (quick) <em>and</em> you can download as a file after calculating.
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- wiz-body -->
+
+<div class="wiz-foot">
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="btn btn-sec" id="btnBack" onclick="window.wizBack()" style="display:none">← Back</button>
+  </div>
+  <button class="btn btn-pri" id="btnNext" onclick="window.wizNext()">Start →</button>
+</div>
+
+</div><!-- wiz-card -->
+</div><!-- wiz-overlay -->
+
+<!-- ══════════════════ RESULTS ══════════════════════════════════════ -->
+<div class="page" id="resultsPage">
+
+<div class="main-hdr">
+  <h1>🏠 <span id="r-title">Property Investment Calculator</span>
+    <span id="r-sub">Ägarlägenhet</span>
+    <span class="unsaved-pill" id="unsavedPill">⚠️ Unsaved changes</span>
+  </h1>
+  <div class="hdr-btns">
+    <button class="hdr-btn" onclick="window.openWiz()" data-i18n="editInputs">✏️ Edit inputs</button>
+    <button class="hdr-btn accent" onclick="window.saveCalc()" data-i18n="save">💾 Save</button>
+    <button class="hdr-btn" onclick="window.openCmpDialog()" data-i18n="compare">📊 Compare</button>
+    <button class="hdr-btn" onclick="window.newCalc()" data-i18n="new">＋ New</button>
+  </div>
+</div>
+<div class="links-bar" id="linksBar"></div>
+
+<div class="cards" id="cardsGrid">
+  <div class="card c1" id="card1">
+    <h3 data-i18n="scenario1">Financing Alt. 1 — New Bank Loan</h3>
+    <div class="big" id="s1-th">—</div><div class="sub" data-i18n="monthly_takehome">Monthly take-home after tax</div>
+    <div class="metrics">
+      <div class="m"><div class="m-val" id="s1-roi">—</div><div class="m-lbl" data-i18n="roi_on_capital">ROI on capital</div></div>
+      <div class="m"><div class="m-val" id="s1-cap">—</div><div class="m-lbl" data-i18n="cash_at_purchase">Cash at purchase</div></div>
+      <div class="m"><div class="m-val" id="s1-int">—</div><div class="m-lbl" data-i18n="bank_interest_mth">Bank interest / mth</div></div>
+      <div class="m"><div class="m-val" id="s1-cost">—</div><div class="m-lbl" data-i18n="total_monthly_cost">Total monthly cost</div></div>
+    </div>
+  </div>
+  <div class="card c2 hidden-card" id="card2">
+    <h3 id="card2-h3">Financing Alt. 2 — Large Existing Top-up</h3>
+    <div class="big" id="s2-th">—</div><div class="sub" data-i18n="monthly_takehome">Monthly take-home after tax</div>
+    <div class="metrics">
+      <div class="m"><div class="m-val" id="s2-roi">—</div><div class="m-lbl" data-i18n="roi_on_capital">ROI on capital</div></div>
+      <div class="m"><div class="m-val" id="s2-cap">—</div><div class="m-lbl" data-i18n="cash_at_purchase">Cash at purchase</div></div>
+      <div class="m"><div class="m-val" id="s2-int">—</div><div class="m-lbl" data-i18n="total_interest_mth">Total interest / mth</div></div>
+      <div class="m"><div class="m-val" id="s2-cost">—</div><div class="m-lbl" data-i18n="total_monthly_cost">Total monthly cost</div></div>
+    </div>
+  </div>
+  <div class="card c3 hidden-card" id="card3">
+    <h3 id="card3-h3">Financing Alt. 3 — Small Existing Top-up</h3>
+    <div class="big" id="s3-th">—</div><div class="sub" data-i18n="monthly_takehome">Monthly take-home after tax</div>
+    <div class="metrics">
+      <div class="m"><div class="m-val" id="s3-roi">—</div><div class="m-lbl" data-i18n="roi_on_capital">ROI on capital</div></div>
+      <div class="m"><div class="m-val" id="s3-cap">—</div><div class="m-lbl" data-i18n="cash_at_purchase">Cash at purchase</div></div>
+      <div class="m"><div class="m-val" id="s3-int">—</div><div class="m-lbl" data-i18n="total_interest_mth">Total interest / mth</div></div>
+      <div class="m"><div class="m-val" id="s3-cost">—</div><div class="m-lbl" data-i18n="total_monthly_cost">Total monthly cost</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 1 -->
+<div class="section" id="sec1">
+<div class="sec-hdr" onclick="window.toggleSection('sec1')">
+  <span data-i18n="sec_property">SECTION 1 · PROPERTY DETAILS</span><span class="sec-chevron">▼</span></div>
+<div class="sec-body" id="sec1-body">
+<table class="tbl"><tr>
+  <td class="lbl ch lbl-h" data-i18n="col_description">Description</td><td class="unit ch lbl-h" data-i18n="col_unit">Unit</td>
+  <td class="v1 ch alt1"><span class="col-alt-label">Alt. 1</span><br><small style="font-weight:400;opacity:.8" data-i18n="col_new_bank_loan">New Bank Loan</small></td>
+  <td class="v2 ch alt2"><span class="col-alt-label">Alt. 2</span><br><small style="font-weight:400;opacity:.8" data-i18n="col_large_topup">Large Top-up</small></td>
+  <td class="v3 ch alt3"><span class="col-alt-label">Alt. 3</span><br><small style="font-weight:400;opacity:.8" data-i18n="col_small_topup">Small Top-up</small></td>
+  <td class="tip ch lbl-h"></td>
+</tr>
+<tr class="row-plain"><td class="lbl" data-i18n="row_prop_value">Property Value</td><td class="unit">SEK</td>
+  <td class="v1"><span id="o-val">—</span></td><td class="v2"><span id="o-val2">—</span></td><td class="v3"><span id="o-val3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Purchase price.</span></span></td></tr>
+<tr class="row-plain"><td class="lbl" data-i18n="row_housing_type">Housing Type</td><td class="unit"></td>
+  <td class="v1"><span class="val" id="o-type1">Ägarrätt</span></td><td class="v2"><span class="val" id="o-type2">Ägarrätt</span></td><td class="v3"><span class="val" id="o-type3">Ägarrätt</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-type">Ägarlägenhet = real property (fastighet). You own it like a house.</span></span></td></tr>
+<tr class="row-plain" id="row-ptax-tr"><td class="lbl"><span id="ptax-lbl">Fastighetsskatt</span> <small id="ptax-sub">Exempt — first 15 years</small></td><td class="unit">SEK/yr</td>
+  <td class="v1"><span id="o-ptax">—</span></td><td class="v2"><span id="o-ptax2">—</span></td><td class="v3"><span id="o-ptax3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">0.75% of taxeringsvärde, capped at 10 425 kr/yr (2026). New builds exempt for 15 years.</span></span></td></tr>
+<tr class="row-plain" id="row-pantsattning-tr" style="display:none"><td class="lbl">Pantsättningsavgift <small>One-time — paid to BRF</small></td><td class="unit">SEK</td>
+  <td class="v1"><span id="o-pantsattning1">—</span></td><td class="v2"><span id="o-pantsattning2">—</span></td><td class="v3"><span id="o-pantsattning3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Fee for registering a mortgage pledge in the BRF register.</span></span></td></tr>
+<tr class="row-plain" id="row-overlatelse-tr" style="display:none"><td class="lbl">Överlåtelseavgift <small>One-time — paid to BRF</small></td><td class="unit">SEK</td>
+  <td class="v1"><span id="o-overlatelse1">—</span></td><td class="v2"><span id="o-overlatelse2">—</span></td><td class="v3"><span id="o-overlatelse3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Transfer fee paid to the BRF when purchasing a bostadsrätt.</span></span></td></tr>
+</table></div></div>
+
+<!-- Section 2 -->
+<div class="section" id="sec2">
+<div class="sec-hdr" onclick="window.toggleSection('sec2')">
+  <span data-i18n="sec_financing">SECTION 2 · FINANCING</span><span class="sec-chevron">▼</span></div>
+<div class="sec-body" id="sec2-body">
+<table class="tbl"><tr>
+  <td class="lbl ch lbl-h"></td><td class="unit ch lbl-h"></td>
+  <td class="v1 ch alt1"><span class="col-alt-label">Alt. 1</span></td><td class="v2 ch alt2"><span class="col-alt-label">Alt. 2</span></td><td class="v3 ch alt3"><span class="col-alt-label">Alt. 3</span></td>
+  <td class="tip ch lbl-h"></td>
+</tr>
+<tr class="row-plain"><td class="lbl" data-i18n="row_down_pay_own">Down Payment — Own Savings</td><td class="unit">SEK</td>
+  <td class="v1"><span id="o-dp1">—</span></td><td class="v2"><span id="o-dp2">—</span></td><td class="v3"><span id="o-dp3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-dp">Your own cash. From April 2026: minimum 10% of purchase price (new 90% bolånetak).</span></span></td></tr>
+<tr class="row-plain"><td class="lbl"><span data-i18n="row_extra_loan">Extra Loan — Existing Apartment</span> <small>Alt. 2: large (LTV &gt;70%), Alt. 3: small (LTV &lt;50%)</small></td><td class="unit">SEK</td>
+  <td class="v1"><span class="na-val">—</span></td><td class="v2"><span id="o-ex2">—</span></td><td class="v3"><span id="o-ex3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-ex">Amount borrowed against existing apartment. Max top-up = existing apt value × 90% − current loan.</span></span></td></tr>
+<tr class="row-res"><td class="lbl" data-i18n="row_total_down">Total Down Payment to Seller</td><td class="unit">SEK</td>
+  <td class="v1"><span id="o-tdp1">—</span></td><td class="v2"><span id="o-tdp2">—</span></td><td class="v3"><span id="o-tdp3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-tdp">Total cash sent to seller on closing day.<span class="tip-formula"><b>Formula:</b> Own savings + extra loan from existing apt</span></span></span></td></tr>
+<tr class="row-res"><td class="lbl"><span data-i18n="row_new_mortgage">New Mortgage Loan</span> <small>= Price − total down payment</small></td><td class="unit">SEK</td>
+  <td class="v1"><span id="o-loan1">—</span></td><td class="v2"><span id="o-loan2">—</span></td><td class="v3"><span id="o-loan3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-loan">Bank wires this to the seller.<span class="tip-formula"><b>Formula:</b> Purchase price − own savings − extra loan from existing apt</span></span></span></td></tr>
+<tr class="row-res"><td class="lbl"><span data-i18n="row_ltv_new">LTV — New Apartment</span> <small>✅ &lt;50% · ⚠️ 50–70% 1%/yr · ❌ &gt;70% 2%/yr</small></td><td class="unit">%</td>
+  <td class="v1"><span id="o-ltv1">—</span></td><td class="v2"><span id="o-ltv2">—</span></td><td class="v3"><span id="o-ltv3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-ltv">Loan-to-value ratio for the new property. Determines mandatory amortization.<span class="tip-formula"><b>Formula:</b> New mortgage ÷ Purchase price × 100</span></span></span></td></tr>
+<tr class="row-plain"><td class="lbl" data-i18n="row_interest_rate">Interest Rate — New Mortgage</td><td class="unit">%/yr</td>
+  <td class="v1"><span id="o-rate1">—</span></td><td class="v2"><span id="o-rate2">—</span></td><td class="v3"><span id="o-rate3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-rate">Annual interest rate on the new mortgage.</span></span></td></tr>
+<tr class="row-plain"><td class="lbl"><span data-i18n="row_interest_rate_topup">Interest Rate — Existing Loan Top-up</span> <small>Alt. 2 and Alt. 3 may differ</small></td><td class="unit">%/yr</td>
+  <td class="v1"><span class="na-val">—</span></td><td class="v2"><span id="o-erate2">—</span></td><td class="v3"><span id="o-erate3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-erate">Interest rate on the extra loan taken from the existing apartment.</span></span></td></tr>
+<tr class="row-plain"><td class="lbl" data-i18n="row_amortization">Amortization — New Mortgage</td><td class="unit">%/yr</td>
+  <td class="v1"><span id="o-amor1">—</span></td><td class="v2"><span id="o-amor2">—</span></td><td class="v3"><span id="o-amor3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-amor">Mandatory amortization on the new property mortgage (2026 rules).</span></span></td></tr>
+<tr class="row-plain"><td class="lbl"><span data-i18n="row_amort_topup">Amortization — Existing Loan Top-up</span> <small>Based on new LTV of existing apt</small></td><td class="unit">%/yr</td>
+  <td class="v1"><span class="na-val">—</span></td><td class="v2"><span id="o-eamor2">—</span></td><td class="v3"><span id="o-eamor3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-eamor">Amortization on the top-up loan, determined by the new LTV of the existing apartment.</span></span></td></tr>
+<tr class="row-plain" id="row-lag-tr"><td class="lbl"><span data-i18n="row_lagfart">Lagfart — Stamp Duty</span> <small id="lag-sub">1.5% of purchase price · one-time</small></td><td class="unit">SEK</td>
+  <td class="v1"><span id="o-lag1">—</span></td><td class="v2"><span id="o-lag2">—</span></td><td class="v3"><span id="o-lag3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-lag">One-time fee to Lantmäteriet on registration.<span class="tip-formula"><b>Formula:</b> Purchase price × 1.5% (+ 825 kr for hus)</span></span></span></td></tr>
+<tr class="row-plain" id="row-pant-tr"><td class="lbl"><span data-i18n="row_pantbrev">Pantbrev — Mortgage Deed</span> <small id="pant-sub">2% of new loan · lower for Alt. 2/3</small></td><td class="unit">SEK</td>
+  <td class="v1"><span id="o-pant1">—</span></td><td class="v2"><span id="o-pant2">—</span></td><td class="v3"><span id="o-pant3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-pant">One-time mortgage registration fee.<span class="tip-formula"><b>Formula:</b> New mortgage loan × 2%</span></span></span></td></tr>
+<tr class="row-key"><td class="lbl" id="tot-lbl"><span data-i18n="row_total_cash">Total Cash Required at Purchase</span> <small id="tot-sub">Own savings + lagfart + pantbrev</small></td><td class="unit">SEK</td>
+  <td class="v1"><span id="o-tot1">—</span></td><td class="v2"><span id="o-tot2">—</span></td><td class="v3"><span id="o-tot3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-tot">All cash you need on closing day.<span class="tip-formula"><b>Formula:</b> Own savings + lagfart + pantbrev</span></span></span></td></tr>
+</table></div></div>
+
+<!-- Section 3 -->
+<div class="section" id="sec3">
+<div class="sec-hdr" onclick="window.toggleSection('sec3')">
+  <span data-i18n="sec_monthly">SECTION 3 · MONTHLY INCOME &amp; COSTS</span><span class="sec-chevron">▼</span></div>
+<div class="sec-body" id="sec3-body">
+<table class="tbl"><tr>
+  <td class="lbl ch lbl-h"></td><td class="unit ch lbl-h"></td>
+  <td class="v1 ch alt1"><span class="col-alt-label">Alt. 1</span></td><td class="v2 ch alt2"><span class="col-alt-label">Alt. 2</span></td><td class="v3 ch alt3"><span class="col-alt-label">Alt. 3</span></td>
+  <td class="tip ch lbl-h"></td>
+</tr>
+<tr class="row-sub-hdr"><td colspan="6" data-i18n="income_from_tenant">(+) Income from tenant</td></tr>
+<tr class="row-plain"><td class="lbl" data-i18n="row_base_rent">Base Rent</td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-rent1">—</span></td><td class="v2"><span id="o-rent2">—</span></td><td class="v3"><span id="o-rent3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Monthly rent from tenant.</span></span></td></tr>
+<tr class="row-plain"><td class="lbl" data-i18n="row_utility">Utility Reimbursement</td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-util1">—</span></td><td class="v2"><span id="o-util2">—</span></td><td class="v3"><span id="o-util3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Taxed as rental income. Offsets your utility costs.</span></span></td></tr>
+<tr class="row-res"><td class="lbl" data-i18n="row_total_monthly_income">Total Monthly Income</td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-inc1">—</span></td><td class="v2"><span id="o-inc2">—</span></td><td class="v3"><span id="o-inc3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Total cash received from tenant each month.</span></span></td></tr>
+<tr class="row-sub-hdr"><td colspan="6" data-i18n="ownership_costs">(−) Ownership costs</td></tr>
+<tr class="row-cost" id="row-ga"><td class="lbl" data-i18n="row_ga_fee">GA / Samfällighetsavgift</td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-ga1">—</span></td><td class="v2"><span id="o-ga2">—</span></td><td class="v3"><span id="o-ga3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Monthly shared facility fee.</span></span></td></tr>
+<tr class="row-cost" id="row-manavgift" style="display:none"><td class="lbl" data-i18n="row_manavgift">Månadsavgift — BRF fee</td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-mav1">—</span></td><td class="v2"><span id="o-mav2">—</span></td><td class="v3"><span id="o-mav3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Monthly fee to the BRF.</span></span></td></tr>
+<tr class="row-cost" id="row-driftkostnad" style="display:none"><td class="lbl" data-i18n="row_driftkostnad">Driftkostnad</td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-drift1">—</span></td><td class="v2"><span id="o-drift2">—</span></td><td class="v3"><span id="o-drift3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Additional operating costs not covered by månadsavgift.</span></span></td></tr>
+<tr class="row-cost" id="row-ins" style="display:none"><td class="lbl" data-i18n="row_insurance">Insurance / Fastighetsförsäkring</td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-ins1">—</span></td><td class="v2"><span id="o-ins2">—</span></td><td class="v3"><span id="o-ins3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Property insurance.</span></span></td></tr>
+<tr class="row-cost" id="row-water" style="display:none"><td class="lbl" data-i18n="row_water">Water / Vatten</td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-water1">—</span></td><td class="v2"><span id="o-water2">—</span></td><td class="v3"><span id="o-water3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Water cost if billed separately.</span></span></td></tr>
+<tr class="row-cost" id="row-el" style="display:none"><td class="lbl" data-i18n="row_electricity">Electricity / El</td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-el1">—</span></td><td class="v2"><span id="o-el2">—</span></td><td class="v3"><span id="o-el3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Electricity if not included.</span></span></td></tr>
+<tr class="row-cost" id="row-heat" style="display:none"><td class="lbl" data-i18n="row_heating">Heating / Värme</td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-heat1">—</span></td><td class="v2"><span id="o-heat2">—</span></td><td class="v3"><span id="o-heat3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">District heating if billed separately.</span></span></td></tr>
+<tr class="row-cost" id="row-other" style="display:none"><td class="lbl" data-i18n="row_other_cost">Other / Övrigt</td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-oth1">—</span></td><td class="v2"><span id="o-oth2">—</span></td><td class="v3"><span id="o-oth3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Any other recurring ownership costs.</span></span></td></tr>
+<tr class="row-cost" id="row-hus-drift" style="display:none"><td class="lbl"><span data-i18n="row_hus_drift">Driftkostnad</span> <small id="hus-drift-sub">Annual costs ÷ 12</small></td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-husdrift1">—</span></td><td class="v2"><span id="o-husdrift2">—</span></td><td class="v3"><span id="o-husdrift3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Annual driftkostnad divided by 12.</span></span></td></tr>
+<tr class="row-cost" id="row-hus-fa" style="display:none"><td class="lbl"><span data-i18n="row_hus_fa">Fastighetsavgift</span> <small>min(taxv × 0.75%, 10 425 kr/yr) ÷ 12</small></td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-husfa1">—</span></td><td class="v2"><span id="o-husfa2">—</span></td><td class="v3"><span id="o-husfa3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-husfa">Swedish fastighetsavgift for småhus.<span class="tip-formula"><b>Formula:</b> min(taxeringsvärde × 0.75%, 10 425) ÷ 12</span></span></span></td></tr>
+<tr class="row-cost" id="row-andrahand" style="display:none"><td class="lbl"><span data-i18n="row_andrahand">Andrahandsuthyrning avgift</span> <small>BRF subletting fee</small></td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-andrahand1">—</span></td><td class="v2"><span id="o-andrahand2">—</span></td><td class="v3"><span id="o-andrahand3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Annual fee ÷12 for BRF subletting permission. Default: 5 880 kr/yr.</span></span></td></tr>
+<tr class="row-sub-hdr"><td colspan="6" data-i18n="bank_costs">(−) Bank costs — interest &amp; amortization</td></tr>
+<tr class="row-plain"><td class="lbl" data-i18n="row_bank_interest">Bank Interest — New Mortgage</td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-int1">—</span></td><td class="v2"><span id="o-int2">—</span></td><td class="v3"><span id="o-int3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-int">Monthly interest on the new property mortgage.<span class="tip-formula"><b>Formula:</b> New mortgage × Interest rate ÷ 12</span></span></span></td></tr>
+<tr class="row-plain"><td class="lbl"><span data-i18n="row_interest_topup">Interest — Existing Loan Top-up</span> <small>Alt. 2 and Alt. 3 only</small></td><td class="unit">SEK/mth</td>
+  <td class="v1"><span class="na-val">—</span></td><td class="v2"><span id="o-eint2">—</span></td><td class="v3"><span id="o-eint3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-eint">Monthly interest on the extra loan from the existing apartment.<span class="tip-formula"><b>Formula:</b> Extra loan × Existing loan rate ÷ 12</span></span></span></td></tr>
+<tr class="row-plain"><td class="lbl"><span data-i18n="row_amort_topup">Amortization — Existing Loan Top-up</span> <small>KEY difference between Alt. 2 and Alt. 3</small></td><td class="unit">SEK/mth</td>
+  <td class="v1"><span class="na-val">—</span></td><td class="v2"><span id="o-eam2">—</span></td><td class="v3"><span id="o-eam3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-eam">Monthly amortization on the top-up. Alt. 2: 2%/yr. Alt. 3: 0%.<span class="tip-formula"><b>Formula:</b> Extra loan × Amortization % ÷ 12</span></span></span></td></tr>
+<tr class="row-plain"><td class="lbl" data-i18n="row_amortization">Amortization — New Mortgage</td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-am1">—</span></td><td class="v2"><span id="o-am2">—</span></td><td class="v3"><span id="o-am3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-am">Monthly amortization on the new property mortgage.<span class="tip-formula"><b>Formula:</b> New mortgage × Amortization % ÷ 12</span></span></span></td></tr>
+<tr class="row-highlight"><td class="lbl"><span data-i18n="row_cashflow_pretax">Monthly Cash Flow Before Tax</span> <small>All income minus all costs</small></td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-cf1">—</span></td><td class="v2"><span id="o-cf2">—</span></td><td class="v3"><span id="o-cf3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-cf">Net monthly cash in hand before the annual Skatteverket tax.<span class="tip-formula"><b>Formula:</b> Total income − all costs − interest − amortization</span></span></span></td></tr>
+</table></div></div>
+
+<!-- Section 4 -->
+<div class="section" id="sec4">
+<div class="sec-hdr" onclick="window.toggleSection('sec4')">
+  <span data-i18n="sec_rental_tax">SECTION 4 · RENTAL TAX — Skatteverket Schablon Method</span><span style="display:flex;align-items:center;gap:10px;"><span style="font-size:10px;opacity:0.65;font-weight:500">· Same for all financing alternatives</span><span class="sec-chevron">▼</span></span></div>
+<div class="sec-body" id="sec4-body">
+<table class="tbl"><tr>
+  <td class="lbl ch lbl-h"></td><td class="unit ch lbl-h"></td>
+  <td class="v1 ch alt1"><span class="col-alt-label">Alt. 1</span></td><td class="v2 ch alt2"><span class="col-alt-label">Alt. 2</span></td><td class="v3 ch alt3"><span class="col-alt-label">Alt. 3</span></td>
+  <td class="tip ch lbl-h"></td>
+</tr>
+<tr class="row-res"><td class="lbl"><span data-i18n="row_annual_rent">Annual Rental Income</span> <small>= Monthly income × 12</small></td><td class="unit">SEK/yr</td>
+  <td class="v1"><span id="o-ann1">—</span></td><td class="v2"><span id="o-ann2">—</span></td><td class="v3"><span id="o-ann3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-ann">Same for all alternatives.<span class="tip-formula"><b>Formula:</b> (Base rent + utility) × 12</span></span></span></td></tr>
+<tr class="row-plain"><td class="lbl"><span data-i18n="row_schablon">(−) Fixed Deduction — Schablonavdrag</span> <small>40,000 SEK/yr per property</small></td><td class="unit">SEK/yr</td>
+  <td class="v1"><span class="val">−40 000</span></td><td class="v2"><span class="val">−40 000</span></td><td class="v3"><span class="val">−40 000</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Skatteverket's flat-rate deduction per property per year.</span></span></td></tr>
+<tr class="row-res"><td class="lbl"><span id="row-20p-lbl">(−) 20% Variable Deduction</span></td><td class="unit">SEK/yr</td>
+  <td class="v1"><span class="val neg" id="o-20p1">—</span></td><td class="v2"><span class="val neg" id="o-20p2">—</span></td><td class="v3"><span class="val neg" id="o-20p3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-20p">Variable deduction equal to 20% of annual rental income.<span class="tip-formula"><b>Formula:</b> Annual rental income × 20%</span></span></span></td></tr>
+<tr class="row-res"><td class="lbl"><span data-i18n="row_taxable_surplus">Taxable Surplus</span> <small>Only this is taxed at 30%</small></td><td class="unit">SEK/yr</td>
+  <td class="v1"><span id="o-sur1">—</span></td><td class="v2"><span id="o-sur2">—</span></td><td class="v3"><span id="o-sur3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-sur">The amount actually subject to 30% capital tax.<span class="tip-formula"><b>Formula:</b> Annual income − 40,000 − (Annual income × 20%)</span></span></span></td></tr>
+<tr class="row-key"><td class="lbl"><span data-i18n="row_rental_tax">Annual Rental Tax</span> <small>Declare in May deklaration — set aside ÷12 monthly</small></td><td class="unit">SEK/yr</td>
+  <td class="v1"><span id="o-tax1">—</span></td><td class="v2"><span id="o-tax2">—</span></td><td class="v3"><span id="o-tax3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-tax">Paid once per year in the May deklaration. Same for all alternatives.<span class="tip-formula"><b>Formula:</b> Taxable surplus × 30%</span></span></span></td></tr>
+</table></div></div>
+
+<!-- Section 5 -->
+<div class="section" id="sec5">
+<div class="sec-hdr" onclick="window.toggleSection('sec5')">
+  <span data-i18n="sec_returns">SECTION 5 · INVESTMENT RETURNS</span><span class="sec-chevron">▼</span></div>
+<div class="sec-body" id="sec5-body">
+<table class="tbl"><tr>
+  <td class="lbl ch lbl-h"></td><td class="unit ch lbl-h"></td>
+  <td class="v1 ch alt1"><span class="col-alt-label">Alt. 1</span></td><td class="v2 ch alt2"><span class="col-alt-label">Alt. 2</span></td><td class="v3 ch alt3"><span class="col-alt-label">Alt. 3</span></td>
+  <td class="tip ch lbl-h"></td>
+</tr>
+<tr class="row-res"><td class="lbl"><span data-i18n="row_annual_cf">Annual Net Cash Flow Before Tax</span> <small>= Monthly CF × 12</small></td><td class="unit">SEK/yr</td>
+  <td class="v1"><span id="o-acf1">—</span></td><td class="v2"><span id="o-acf2">—</span></td><td class="v3"><span id="o-acf3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-acf">Annualised cash flow before rental tax.<span class="tip-formula"><b>Formula:</b> Monthly Cash Flow × 12</span></span></span></td></tr>
+<tr class="row-plain"><td class="lbl" data-i18n="row_annual_rental_tax">(−) Annual Rental Tax</td><td class="unit">SEK/yr</td>
+  <td class="v1"><span class="val neg" id="o-taxb1">—</span></td><td class="v2"><span class="val neg" id="o-taxb2">—</span></td><td class="v3"><span class="val neg" id="o-taxb3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-taxb">Same for all alternatives.<span class="tip-formula"><b>Formula:</b> Taxable surplus × 30%</span></span></span></td></tr>
+<tr class="row-plain"><td class="lbl"><span data-i18n="row_ranteavdrag">(+) Ränteavdrag — Interest Tax Credit</span> <small>30% on first 100 000 kr/yr · 21% above</small></td><td class="unit">SEK/yr</td>
+  <td class="v1"><span class="val pos" id="o-ra1">—</span></td><td class="v2"><span class="val pos" id="o-ra2">—</span></td><td class="v3"><span class="val pos" id="o-ra3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box">Swedish mortgage interest tax deduction.<span class="tip-formula"><b>Formula:</b> min(annual interest, 100 000) × 30% + max(0, annual interest − 100 000) × 21%</span></span></span></td></tr>
+<tr class="row-highlight"><td class="lbl"><span data-i18n="row_annual_return">Annual Return After Tax</span> <small>True yearly profit after ALL costs, tax, and ränteavdrag</small></td><td class="unit">SEK/yr</td>
+  <td class="v1"><span id="o-ret1">—</span></td><td class="v2"><span id="o-ret2">—</span></td><td class="v3"><span id="o-ret3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-ret">What you actually keep each year after all costs.<span class="tip-formula"><b>Formula:</b> Annual Net Cash Flow − Rental Tax + Ränteavdrag</span></span></span></td></tr>
+<tr class="row-highlight"><td class="lbl"><span data-i18n="row_monthly_return">Monthly Take-Home After Tax</span> <small>= Annual return ÷ 12</small></td><td class="unit">SEK/mth</td>
+  <td class="v1"><span id="o-mth1">—</span></td><td class="v2"><span id="o-mth2">—</span></td><td class="v3"><span id="o-mth3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-mth">Monthly equivalent of the annual return.<span class="tip-formula"><b>Formula:</b> Annual Return After Tax ÷ 12</span></span></span></td></tr>
+<tr class="row-blank"><td colspan="6"></td></tr>
+<tr class="row-res"><td class="lbl"><span data-i18n="row_invested_capital">Total Invested Capital (Eget Kapital)</span> <small>Down payment + lagfart + pantbrev</small></td><td class="unit">SEK</td>
+  <td class="v1"><span id="o-cap1">—</span></td><td class="v2"><span id="o-cap2">—</span></td><td class="v3"><span id="o-cap3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-cap">All your own cash tied up in this purchase.<span class="tip-formula"><b>Formula:</b> Own savings + Lagfart + Pantbrev</span></span></span></td></tr>
+<tr class="row-res"><td class="lbl"><span data-i18n="row_gross_yield">Gross Rental Yield</span> <small>Annual rent ÷ purchase price</small></td><td class="unit">%/yr</td>
+  <td class="v1"><span id="o-gy1">—</span></td><td class="v2"><span id="o-gy2">—</span></td><td class="v3"><span id="o-gy3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-gy">Market benchmark. ~4–5% typical for Swedish cities.<span class="tip-formula"><b>Formula:</b> Annual Rent ÷ Purchase Price × 100</span></span></span></td></tr>
+<tr class="row-res"><td class="lbl">Direktavkastning <small>Net operating yield — financing-independent</small></td><td class="unit">%/yr</td>
+  <td class="v1"><span id="o-dy1">—</span></td><td class="v2"><span id="o-dy2">—</span></td><td class="v3"><span id="o-dy3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-dy">Standard Swedish property investment metric (cap rate). Same for all alternatives.<span class="tip-formula"><b>Formula:</b> (Annual Rent − Annual Operating Costs − Rental Tax) ÷ Purchase Price × 100</span></span></span></td></tr>
+<tr class="row-res"><td class="lbl"><span data-i18n="row_net_yield">Levered Return on Property Value</span> <small>Annual return incl. financing costs ÷ property value</small></td><td class="unit">%/yr</td>
+  <td class="v1"><span id="o-ny1">—</span></td><td class="v2"><span id="o-ny2">—</span></td><td class="v3"><span id="o-ny3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-ny">Return on full property value after financing costs.<span class="tip-formula"><b>Formula:</b> Annual Return After Tax ÷ Purchase Price × 100</span></span></span></td></tr>
+<tr class="row-key"><td class="lbl"><span data-i18n="row_roi_full">Return on Invested Capital (ROI)</span> <small>Annual return ÷ own cash invested</small></td><td class="unit">%/yr</td>
+  <td class="v1"><span id="o-roi1">—</span></td><td class="v2"><span id="o-roi2">—</span></td><td class="v3"><span id="o-roi3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-roi">ROI on cash you actually put in. Leverage amplifies this.<span class="tip-formula"><b>Formula:</b> Annual Return After Tax ÷ Total Invested Capital × 100</span></span></span></td></tr>
+
+<!-- Advanced return analysis rows -->
+<tr class="row-blank adv-row" id="row-adv-blank" style="display:none"><td colspan="6"></td></tr>
+<tr class="row-sub-hdr adv-row" id="row-adv-hdr" style="display:none">
+  <td colspan="6" id="row-adv-hdr-txt">Advanced Return Analysis</td></tr>
+<tr class="row-res adv-row" id="row-app-tr" style="display:none">
+  <td class="lbl">(+) Expected Appreciation <small id="row-app-sub">Gross annual property value increase (pre-tax)</small></td><td class="unit">SEK/yr</td>
+  <td class="v1"><span class="val pos" id="o-app1">—</span></td><td class="v2"><span class="val pos" id="o-app2">—</span></td><td class="v3"><span class="val pos" id="o-app3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-app">Expected annual property value increase (gross, pre-tax).<span class="tip-formula"><b>Formula:</b> Purchase Price × Appreciation Rate ÷ 100</span></span></span></td></tr>
+<tr class="row-res adv-row" id="row-opp-tr" style="display:none">
+  <td class="lbl">(−) Opportunity Cost <small>Capital tied up × alternative return rate</small></td><td class="unit">SEK/yr</td>
+  <td class="v1"><span class="val neg" id="o-opp1">—</span></td><td class="v2"><span class="val neg" id="o-opp2">—</span></td><td class="v3"><span class="val neg" id="o-opp3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-opp">Alternativkostnad — return foregone by having capital in property.<span class="tip-formula"><b>Formula:</b> Total Invested Capital × Alternative Return Rate ÷ 100</span></span></span></td></tr>
+<tr class="row-highlight adv-row" id="row-econret-tr" style="display:none">
+  <td class="lbl">True Economic Return <small>Cash return + appreciation − opportunity cost</small></td><td class="unit">SEK/yr</td>
+  <td class="v1"><span id="o-econret1">—</span></td><td class="v2"><span id="o-econret2">—</span></td><td class="v3"><span id="o-econret3">—</span></td>
+  <td class="tip"><span class="tip-icon">i<span class="tip-box" id="tip-econret">Total economic return: cash return + appreciation − opportunity cost.<span class="tip-formula"><b>Formula:</b> Annual Return After Tax + Appreciation − Opportunity Cost</span></span></span></td></tr>
+</table></div></div>
+
+<div class="footer">ⓘ Swedish rules built in: Lagfart 1.5% (+825 kr for hus) · Pantbrev 2% · Fastighetsavgift min(0.75% × taxv, 10 425 kr/yr) · Amorteringskravet · Schablon rental tax · Ränteavdrag 30%/21% &nbsp;|&nbsp; Click <strong>Edit inputs</strong> to modify values &nbsp;|&nbsp; <a href="Property_Calculator_Methodology_v2.html" target="_blank" data-i18n="methodology" style="color:inherit;opacity:.75;text-decoration:underline">📖 Methodology &amp; formulas</a></div>
+</div><!-- end .page -->
+
+<!-- ══════════════════ COMPARE PAGE ══════════════════════════════ -->
+<div class="page" id="comparePage">
+  <div class="main-hdr">
+    <h1>📊 <span>Property Comparison</span>
+      <span id="cmp-count-sub"></span>
+    </h1>
+    <div class="hdr-btns">
+      <button class="hdr-btn" onclick="window.closeComparePage()">← Back to results</button>
+      <button class="hdr-btn accent" onclick="window.openCmpDialog()">📊 Change selection</button>
+      <button class="hdr-btn" onclick="window.clearCompare()">🗑 Clear all</button>
+    </div>
+  </div>
+  <div id="cmpContent"></div>
+</div>
+
+<!-- Import JSON dialog -->
+<div class="imp-overlay hidden" id="importOverlay">
+  <div class="imp-card">
+    <div class="imp-head">
+      <h2>📥 Import JSON</h2>
+      <p>Review the sessions from the file. Conflicts with existing saved sessions are flagged — choose which version to keep.</p>
+    </div>
+    <div class="imp-body" id="importBody"></div>
+    <div class="imp-foot">
+      <span class="imp-count" id="importCount">0 sessions</span>
+      <div class="imp-foot-btns">
+        <button class="imp-cancel-btn" onclick="window.closeImportDialog()">Cancel</button>
+        <button class="imp-go-btn" id="importGoBtn" onclick="window.confirmImport()">Import</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Compare selection dialog -->
+<div class="cmpd-overlay hidden" id="cmpdOverlay">
+  <div class="cmpd-card">
+    <div class="cmpd-head">
+      <h2>📊 Select properties to compare</h2>
+      <p>Choose 2–4 properties. For properties with multiple financing alternatives, pick which one to compare.</p>
+    </div>
+    <div class="cmpd-body" id="cmpdBody"></div>
+    <div class="cmpd-foot">
+      <span class="cmpd-count" id="cmpdCount">0 selected</span>
+      <div class="cmpd-foot-btns">
+        <button class="cmpd-cancel" onclick="window.closeCmpDialog()">Cancel</button>
+        <button class="cmpd-go" id="cmpdGoBtn" onclick="window.confirmCmpDialog()" disabled>Compare</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Download options modal -->
+<div class="dl-overlay hidden" id="dlOverlay">
+  <div class="dl-card">
+    <div class="dl-card-head">
+      <h3>⬇️ Export / Download</h3>
+      <p>Choose what you want to save</p>
+    </div>
+    <div class="dl-card-body">
+      <div class="dl-section-label">📁 Property Settings (re-importable)</div>
+      <button class="dl-opt-btn" onclick="window.downloadCalc('current')">
+        <div class="dl-opt-icon">📄</div>
+        <div>
+          <div class="dl-opt-title">This property — .json</div>
+          <div class="dl-opt-desc">Saves all your inputs as a .json file. You can import it back at any time.</div>
+        </div>
+      </button>
+      <button class="dl-opt-btn" onclick="window.downloadCalc('all')">
+        <div class="dl-opt-icon">📦</div>
+        <div>
+          <div class="dl-opt-title">All saved properties — .json</div>
+          <div class="dl-opt-desc">Full backup of every property you have saved.</div>
+        </div>
+      </button>
+      <div class="dl-section-label">📊 Results Report (human-readable)</div>
+      <button class="dl-opt-btn" onclick="window.exportMarkdown()">
+        <div class="dl-opt-icon">📝</div>
+        <div>
+          <div class="dl-opt-title">Full analysis report — .md / .txt</div>
+          <div class="dl-opt-desc">Exports a formatted text report with all inputs, financing alternatives, monthly costs, tax calculations, and ROI.</div>
+        </div>
+      </button>
+      <button class="dl-cancel-btn" onclick="document.getElementById('dlOverlay').classList.add('hidden')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Floating tooltip (body level to escape overflow clipping) -->
+<div id="tip-float"></div>
+
+<div class="toast" id="toast"></div>
+
+<div class="zoom-bar">
+  <button onclick="window.applyZoom(window.uiZoom - 0.1)" title="Zoom out">−</button>
+  <span id="zoom-val">120%</span>
+  <button onclick="window.applyZoom(window.uiZoom + 0.1)" title="Zoom in">+</button>
+</div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
