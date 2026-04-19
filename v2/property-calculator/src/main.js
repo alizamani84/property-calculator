@@ -150,10 +150,10 @@ function renderImportDialogContent() {
        e.state?.propertyName === (session.state?.propertyName ?? session.propertyName))
     );
     const hasConflict = !!existingMatch;
-    const propType = session.state?.propertyType || session.propertyType;
+    const propType = session.state?.propertyType || session.propertyType || session.property?.type;
     const badgeColor = propType === 'bostadsratt' ? '#1F3864' : propType === 'hus' ? '#375623' : '#7B3A10';
     const badgeLabel = propType === 'bostadsratt' ? '🏘️ BRF' : propType === 'hus' ? '🏡 Hus' : '🏢 Ägarlägenhet';
-    const price = (session.state?.purchasePrice ?? session.purchasePrice ?? 0).toLocaleString('sv-SE');
+    const price = (session.state?.purchasePrice ?? session.purchasePrice ?? session.property?.purchase_price_sek ?? 0).toLocaleString('sv-SE');
     const name = session.name || session.sessionName || 'Unnamed';
     const date = session.savedAt ? new Date(session.savedAt).toLocaleDateString('sv-SE') : '';
 
