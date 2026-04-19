@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "VITE_ENTRY=calculator vite build && VITE_ENTRY=methodology vite build",
-    "build:calc": "VITE_ENTRY=calculator vite build",
-    "build:method": "VITE_ENTRY=methodology vite build",
+    "build": "npm run build:calc && npm run build:method",
+    "build:calc": "VITE_ENTRY=calculator npx vite build && cp ../dist/index.html ../calculator.html",
+    "build:method": "VITE_ENTRY=methodology npx vite build && cp ../dist/methodology.html ../methodology.html",
     "preview": "vite preview"
   },
   "devDependencies": {

@@ -55,7 +55,6 @@ strong { font-weight: 700; color: #1F3864; }
 .footnote { font-size: 13px; color: #666; margin-top: 36px; padding-top: 22px; border-top: 1px solid #e0e6f0; }
 a { color: #0070C0; text-decoration: none; }
 a:hover { text-decoration: underline; }
-/* RTL support */
 .rtl { text-align: right; direction: rtl; }
 .rtl .toc { border-left: none; border-right: 4px solid #1F3864; padding-right: 32px; padding-left: 22px; }
 .rtl blockquote { border-left: none; border-right: 4px solid #2E75B6; border-radius: 6px 0 0 6px; }
@@ -66,20 +65,21 @@ a:hover { text-decoration: underline; }
 @media print { .nav-back,.lang-bar { display: none; } }
 @media (max-width:768px) { .header { padding: 24px; } .header h1 { font-size: 26px; } .content { padding: 20px; } table { font-size: 14px; } th,td { padding: 9px 10px; } }
 </style>
+  <script type="module" crossorigin>(function(){const n=document.createElement("link").relList;if(n&&n.supports&&n.supports("modulepreload"))return;for(const e of document.querySelectorAll('link[rel="modulepreload"]'))o(e);new MutationObserver(e=>{for(const t of e)if(t.type==="childList")for(const c of t.addedNodes)c.tagName==="LINK"&&c.rel==="modulepreload"&&o(c)}).observe(document,{childList:!0,subtree:!0});function s(e){const t={};return e.integrity&&(t.integrity=e.integrity),e.referrerPolicy&&(t.referrerPolicy=e.referrerPolicy),e.crossOrigin==="use-credentials"?t.credentials="include":e.crossOrigin==="anonymous"?t.credentials="omit":t.credentials="same-origin",t}function o(e){if(e.ep)return;e.ep=!0;const t=s(e);fetch(e.href,t)}})();let i=localStorage.getItem("calcLang")||"en";function l(r){i=r,localStorage.setItem("calcLang",r),["en","sv","fa"].forEach(o=>{const e=document.getElementById("sec-"+o);e&&(e.style.display=o===r?"block":"none")});const s=document.querySelector(".container");s&&s.classList.toggle("rtl",r==="fa"),["en","sv","fa"].forEach(o=>{var e;(e=document.getElementById("btn-"+o))==null||e.classList.toggle("active",o===r)})}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",()=>l(i)):l(i);window.setLang=l;</script>
 </head>
 <body>
 <div class="container">
 <div class="header">
-  <a href="Property_Calculator.html" class="nav-back">&#8592; Back / Tillbaka / &#1576;&#1575;&#1586;&#1711;&#1588;&#1578;</a>
+  <a href="calculator.html" class="nav-back">&#8592; Back / Tillbaka / &#1576;&#1575;&#1586;&#1711;&#1588;&#1578;</a>
   <br><br>
   <h1>Swedish Property Investment Calculator</h1>
   <p id="msub">Methodology &amp; Formula Reference &nbsp;&middot;&nbsp; Income year 2026 &nbsp;&middot;&nbsp; Version 8</p>
 </div>
 <div class="lang-bar">
   <span class="lang-label">Language / Spr&#229;k / &#1586;&#1576;&#1575;&#1606;:</span>
-  <button class="lang-btn active" onclick="setLang('en')" id="btn-en">EN &nbsp;English</button>
-  <button class="lang-btn" onclick="setLang('sv')" id="btn-sv">SV &nbsp;Svenska</button>
-  <button class="lang-btn" onclick="setLang('fa')" id="btn-fa">FA &nbsp;&#1601;&#1575;&#1585;&#1587;&#1740;</button>
+  <button class="lang-btn active" onclick="window.setLang('en')" id="btn-en">EN &nbsp;English</button>
+  <button class="lang-btn" onclick="window.setLang('sv')" id="btn-sv">SV &nbsp;Svenska</button>
+  <button class="lang-btn" onclick="window.setLang('fa')" id="btn-fa">FA &nbsp;&#1601;&#1575;&#1585;&#1587;&#1740;</button>
 </div>
 
 <!-- ═══ ENGLISH ═══ -->
@@ -128,14 +128,13 @@ Monthly amortization = round(loan * annual_amort% / 12)</code></pre>
 <blockquote><strong>DTI rule repealed:</strong> The additional 1%/yr amortization for debt &gt;4.5× gross income was fully repealed 1 April 2026.</blockquote>
 
 <h2 id="a3e">A3. Rental Income Tax (Schablonavdrag)</h2>
-<p>Subletting income is taxed as capital income at 30%. A standardised deduction reduces the taxable amount. The variable deduction differs by property type — see Part B.</p>
+<p>Subletting income is taxed as capital income at 30%. The variable deduction differs by property type — see Part B.</p>
 <pre><code>Annual gross   = (monthly_rent + utility_reimbursement) * 12
 Taxable        = max(0, annual_gross - 40 000 - variable_deduction)
 Annual tax     = round(taxable * 30%)</code></pre>
 <div class="callout"><strong>2026:</strong> Fixed deduction rises to 50 000 kr from 1 July 2026. Calculator uses 40 000 kr (conservative).</div>
 
 <h2 id="a4e">A4. Ränteavdrag (Interest Deduction)</h2>
-<p>Secured bolån interest is deductible against capital income. Unsecured loans lost deductibility from 1 Jan 2026.</p>
 <pre><code>Annual interest = monthly_interest_total * 12
 Ränteavdrag = round(
   min(annual_interest, 100 000) * 30%
@@ -149,105 +148,47 @@ Monthly net   = annual_return / 12</code></pre>
 
 <h2 id="a6e">A6. Performance Metrics</h2>
 <div class="mb"><h4>Gross Rental Yield</h4>
-<div class="mf">Gross yield (%) = annual_gross / purchase_price * 100</div>
-<p>Top-line rent before any costs. Same for all scenarios. Quick screening metric.</p></div>
+<div class="mf">Gross yield (%) = annual_gross / purchase_price * 100</div></div>
 <div class="mb"><h4>Direktavkastning — Net Operating Yield (financing-independent)</h4>
 <div class="mf">(Annual Gross - Annual Ownership Costs - Andrahandsavgift - Annual Tax) / Purchase Price * 100</div>
-<p>Standard Swedish cap rate. Excludes financing costs — identical across all three scenarios. Typical Swedish residential: 1.5–4%.</p></div>
-<div class="mb"><h4>Levered Return on Property Value (financing-dependent)</h4>
-<div class="mf">Levered return (%) = annual_return_after_tax / purchase_price * 100</div>
-<p>Includes financing costs, so differs between scenarios. Below Direktavkastning means financing costs more than the property yields.</p></div>
+<p>Standard Swedish cap rate. Identical across all three scenarios. Typical Swedish residential: 1.5–4%.</p></div>
 <div class="mb"><h4>ROI — Return on Invested Capital (financing-dependent)</h4>
-<div class="mf">ROI (%) = annual_return_after_tax / total_cash_invested * 100
-Total cash invested = down_payment + one_time_costs</div>
-<p>Net annual return on actual cash put in. ROI rewards leverage — smaller down payment for same return = higher ROI.</p></div>
+<div class="mf">ROI (%) = annual_return_after_tax / total_cash_invested * 100</div></div>
 <div class="mb"><h4>LTV — Loan-to-Value</h4>
 <div class="mf">LTV (%) = new_mortgage / purchase_price * 100</div>
 <p>Max LTV 90% from April 2026.</p></div>
 
-<h2 id="a7e">A7. Advanced Analysis — Opportunity Cost &amp; Appreciation</h2>
-<h3>Expected Appreciation</h3>
-<pre><code>Annual appreciation = purchase_price * appreciation_rate% / 100</code></pre>
-<h3>Opportunity Cost</h3>
-<pre><code>Opportunity cost = total_cash_invested * alternative_return_rate% / 100</code></pre>
-<p>What the same capital could have earned elsewhere (e.g. index funds). Differs per scenario.</p>
-<h3>True Economic Return</h3>
-<pre><code>True economic return = annual_return + appreciation - opportunity_cost</code></pre>
-<blockquote><strong>Note:</strong> Appreciation is uncertain. These fields are for scenario modelling only.</blockquote>
+<h2 id="a7e">A7. Advanced Analysis</h2>
+<pre><code>Annual appreciation  = purchase_price * appreciation_rate% / 100
+Opportunity cost     = total_cash_invested * alternative_return_rate% / 100
+True economic return = annual_return + appreciation - opportunity_cost</code></pre>
 
 <h2 class="ph">PART B — By Property Type</h2>
 
-<h2 id="b1e"><span class="badge b-ag">Ägarlägenhet</span> B1. Ägarlägenhet (Freehold Apartment)</h2>
-<p>You hold the title deed directly. You pay lagfart and pantbrev, and are personally liable for fastighetsavgift.</p>
+<h2 id="b1e"><span class="badge b-ag">Ägarlägenhet</span> B1. Ägarlägenhet</h2>
 <h3>B1.1 — One-Time Costs</h3>
 <pre><code>Lagfart  = round(purchase_price * 1.5%) + 825 kr
-Pantbrev = round(max(0, new_mortgage - existing_pantbrev) * 2%) + 375 kr  [if new coverage > 0]
+Pantbrev = round(max(0, new_mortgage - existing_pantbrev) * 2%) + 375 kr
 Total    = down_payment + lagfart + pantbrev</code></pre>
 <h3>B1.2 — Fastighetsavgift</h3>
 <pre><code>Est. taxeringsvärde     = purchase_price * 75%
 Annual fastighetsavgift = min(est_taxvärde * 0.75%, 10 425 kr)
 Monthly                 = round(annual / 12)</code></pre>
-<p>New-build exemption: värdeår ≥ 2011 → exempt 15 years.</p>
-<h3>B1.3 — Monthly Ownership Cost</h3>
-<pre><code>= GA_fee + fastighetsavgift/month + insurance + water + electricity + heating + other</code></pre>
-<h3>B1.4 — Rental Tax</h3>
+<h3>B1.3 — Rental Tax</h3>
 <pre><code>Variable deduction = annual_gross * 20%
 Taxable = max(0, annual_gross - 40 000 - variable_deduction)
 Tax     = round(taxable * 30%)</code></pre>
-<h3>B1.5 — Worked Example</h3>
-<table><thead><tr><th>Step</th><th>Formula</th><th>Result</th></tr></thead><tbody>
-<tr><td>Purchase price</td><td>—</td><td>3 200 000 kr</td></tr>
-<tr><td>Down payment (20%)</td><td>—</td><td>640 000 kr</td></tr>
-<tr><td>New mortgage</td><td>3 200 000 − 640 000</td><td>2 560 000 kr / LTV 80%</td></tr>
-<tr><td>Lagfart</td><td>round(3 200 000 × 1.5%) + 825</td><td>48 825 kr</td></tr>
-<tr><td>Pantbrev</td><td>round(2 560 000 × 2%) + 375</td><td>51 575 kr</td></tr>
-<tr><td><strong>Total invested</strong></td><td>640 000 + 48 825 + 51 575</td><td><strong>740 400 kr</strong></td></tr>
-<tr><td>Monthly interest (3.5%)</td><td>round(2 560 000 × 3.5% / 12)</td><td>7 467 kr</td></tr>
-<tr><td>Monthly amortization (2%)</td><td>round(2 560 000 × 2% / 12)</td><td>4 267 kr</td></tr>
-<tr><td>Fastighetsavgift /mth</td><td>min(2 400 000 × 0.75%, 10 425) / 12</td><td>869 kr</td></tr>
-<tr><td>Ownership cost /mth</td><td>400 (GA) + 869 + 200 (ins)</td><td>1 469 kr</td></tr>
-<tr><td><strong>Monthly cash flow</strong></td><td>12 500 − 1 469 − 7 467 − 4 267</td><td><strong>−703 kr</strong></td></tr>
-<tr><td>Annual rental tax</td><td>max(0, 150 000 − 40 000 − 30 000) × 30%</td><td>24 000 kr</td></tr>
-<tr><td>Ränteavdrag</td><td>round(89 604 × 30%)</td><td>26 881 kr</td></tr>
-<tr><td><strong>Annual return after tax</strong></td><td>−8 436 − 24 000 + 26 881</td><td><strong>−5 555 kr</strong></td></tr>
-<tr><td>ROI</td><td>−5 555 / 740 400</td><td>−0.75%</td></tr>
-<tr><td>Direktavkastning</td><td>(150 000 − 17 628 − 24 000) / 3 200 000</td><td>2.76%</td></tr>
-</tbody></table>
 
-<h2 id="b2e"><span class="badge b-br">Bostadsrätt</span> B2. Bostadsrätt (Cooperative Share)</h2>
-<p>You own a share in a housing cooperative (BRF). No lagfart, no pantbrev, no personal fastighetsavgift. Subletting usually requires BRF approval.</p>
+<h2 id="b2e"><span class="badge b-br">Bostadsrätt</span> B2. Bostadsrätt</h2>
 <h3>B2.1 — One-Time Costs</h3>
 <pre><code>Total = down_payment + pantsättningsavgift + överlåtelseavgift</code></pre>
-<h3>B2.2 — Monthly Ownership Cost</h3>
-<pre><code>= månadsavgift + driftkostnad + insurance + water + electricity + heating + other</code></pre>
-<p>No fastighetsavgift — it is embedded in the månadsavgift (BRF pays it).</p>
-<h3>B2.3 — Monthly Cash Flow</h3>
-<pre><code>= income - ownership_cost - andrahandsavgift/month - interest - amortization</code></pre>
-<h3>B2.4 — Rental Tax (Special BRF Rule)</h3>
+<h3>B2.2 — Rental Tax (Special BRF Rule)</h3>
 <pre><code>BRF deduction = månadsavgift * 12
 Taxable = max(0, annual_gross - 40 000 - BRF_deduction)
 Tax     = round(taxable * 30%)</code></pre>
-<div class="callout"><strong>Key difference:</strong> Bostadsrätt uses <em>månadsavgift × 12</em> as variable deduction. Ägarlägenhet and Hus use <em>annual gross × 20%</em>. A high månadsavgift can eliminate rental tax entirely.</div>
-<h3>B2.5 — Worked Example</h3>
-<table><thead><tr><th>Step</th><th>Formula</th><th>Result</th></tr></thead><tbody>
-<tr><td>Purchase price</td><td>—</td><td>2 800 000 kr</td></tr>
-<tr><td>Down payment (20%)</td><td>—</td><td>560 000 kr</td></tr>
-<tr><td><strong>Total invested</strong></td><td>560 000 + 1 000 + 2 500</td><td><strong>563 500 kr</strong></td></tr>
-<tr><td>Monthly interest (3.2%)</td><td>round(2 240 000 × 3.2% / 12)</td><td>5 973 kr</td></tr>
-<tr><td>Monthly amortization (2%)</td><td>round(2 240 000 × 2% / 12)</td><td>3 733 kr</td></tr>
-<tr><td>Ownership cost</td><td>4 800 (månadsavgift) + 150 (ins)</td><td>4 950 kr</td></tr>
-<tr><td><strong>Monthly cash flow</strong></td><td>13 000 − 4 950 − 300 − 5 973 − 3 733</td><td><strong>−1 956 kr</strong></td></tr>
-<tr><td>BRF deduction</td><td>4 800 × 12</td><td>57 600 kr</td></tr>
-<tr><td>Annual rental tax</td><td>max(0, 156 000 − 40 000 − 57 600) × 30%</td><td>17 520 kr</td></tr>
-<tr><td>Ränteavdrag</td><td>round(71 676 × 30%)</td><td>21 503 kr</td></tr>
-<tr><td><strong>Annual return after tax</strong></td><td>−23 472 − 17 520 + 21 503</td><td><strong>−19 489 kr</strong></td></tr>
-<tr><td>ROI</td><td>−19 489 / 563 500</td><td>−3.46%</td></tr>
-<tr><td>Gross yield</td><td>156 000 / 2 800 000</td><td>5.57%</td></tr>
-<tr><td>Direktavkastning</td><td>(156 000 − 59 400 − 3 600 − 17 520) / 2 800 000</td><td>2.71%</td></tr>
-</tbody></table>
+<div class="callout"><strong>Key difference:</strong> Bostadsrätt uses <em>månadsavgift × 12</em> as variable deduction. A high månadsavgift can eliminate rental tax entirely.</div>
 
-<h2 id="b3e"><span class="badge b-hus">Hus/Villa</span> B3. Hus / Villa (House)</h2>
-<p>Full freehold ownership including land. Pay lagfart, pantbrev, and fastighetsavgift based on actual Skatteverket taxeringsvärde.</p>
+<h2 id="b3e"><span class="badge b-hus">Hus/Villa</span> B3. Hus / Villa</h2>
 <h3>B3.1 — One-Time Costs</h3>
 <pre><code>Lagfart  = round(purchase_price * 1.5%) + 825 kr
 Pantbrev = round(max(0, new_mortgage - existing_pantbrev) * 2%) + 375 kr
@@ -255,33 +196,10 @@ Total    = down_payment + lagfart + pantbrev</code></pre>
 <h3>B3.2 — Fastighetsavgift (Actual Taxeringsvärde)</h3>
 <pre><code>Annual fastighetsavgift = min(taxeringsvärde * 0.75%, 10 425 kr)
 Monthly                 = round(annual / 12)</code></pre>
-<p>New-build exemption: värdeår ≥ 2011 → exempt 15 years.</p>
-<h3>B3.3 — Monthly Ownership Cost</h3>
-<pre><code>= driftkostnad_annual/12 + fastighetsavgift/month + insurance + water + electricity + heating + other</code></pre>
-<h3>B3.4 — Rental Tax</h3>
+<h3>B3.3 — Rental Tax</h3>
 <pre><code>Variable deduction = annual_gross * 20%
 Taxable = max(0, annual_gross - 40 000 - variable_deduction)
 Tax     = round(taxable * 30%)</code></pre>
-<h3>B3.5 — Worked Example (Särimnervägen 3)</h3>
-<table><thead><tr><th>Step</th><th>Formula</th><th>Result</th></tr></thead><tbody>
-<tr><td>Purchase price</td><td>—</td><td>4 995 000 kr</td></tr>
-<tr><td>Down payment</td><td>—</td><td>2 000 000 kr</td></tr>
-<tr><td>Lagfart</td><td>round(4 995 000 × 1.5%) + 825</td><td>75 750 kr</td></tr>
-<tr><td>Pantbrev</td><td>round(2 995 000 × 2%) + 375</td><td>60 275 kr</td></tr>
-<tr><td><strong>Total invested</strong></td><td>2 000 000 + 75 750 + 60 275</td><td><strong>2 136 025 kr</strong></td></tr>
-<tr><td>Monthly interest (2.5%)</td><td>round(2 995 000 × 2.5% / 12)</td><td>6 240 kr</td></tr>
-<tr><td>Monthly amortization (1%)</td><td>round(2 995 000 × 1% / 12)</td><td>2 496 kr</td></tr>
-<tr><td>Fastighetsavgift /mth</td><td>min(4 448 000 × 0.75%, 10 425) / 12</td><td>869 kr</td></tr>
-<tr><td>Driftkostnad /mth</td><td>48 200 / 12</td><td>4 017 kr</td></tr>
-<tr><td><strong>Monthly cash flow</strong></td><td>17 000 − 4 886 − 6 240 − 2 496</td><td><strong>3 378 kr</strong></td></tr>
-<tr><td>Annual rental tax</td><td>max(0, 204 000 − 40 000 − 40 800) × 30%</td><td>36 960 kr</td></tr>
-<tr><td>Ränteavdrag</td><td>round(74 880 × 30%)</td><td>22 464 kr</td></tr>
-<tr><td><strong>Annual return after tax</strong></td><td>40 536 − 36 960 + 22 464</td><td><strong>26 040 kr</strong></td></tr>
-<tr><td>Monthly take-home</td><td>26 040 / 12</td><td>2 170 kr</td></tr>
-<tr><td>ROI</td><td>26 040 / 2 136 025</td><td>1.22%</td></tr>
-<tr><td>Direktavkastning</td><td>(204 000 − 58 632 − 36 960) / 4 995 000</td><td>2.17%</td></tr>
-<tr><td>Levered return on prop. value</td><td>26 040 / 4 995 000</td><td>0.52%</td></tr>
-</tbody></table>
 
 <h2 class="ph">PART C — Reference</h2>
 <h2 id="c1e">C1. Known Simplifications</h2>
@@ -290,14 +208,12 @@ Tax     = round(taxable * 30%)</code></pre>
 <tr><td>Ränteavdrag per taxpayer</td><td>100 000 kr threshold per individual; couples filing separately each get the full threshold.</td></tr>
 <tr><td>Schablonavdrag increase</td><td>Rises to 50 000 kr from 1 July 2026; calculator uses 40 000 kr.</td></tr>
 <tr><td>Capital gains tax</td><td>Exit tax (effective 22%) not modelled. Calculator focuses on running yield.</td></tr>
-<tr><td>Uppskov</td><td>Capital gains deferral on primary-residence resale not modelled.</td></tr>
-<tr><td>ROT-avdrag</td><td>30% labour tax credit for hus repairs (up to 50 000 kr/person/yr) not modelled.</td></tr>
+<tr><td>ROT-avdrag</td><td>30% labour tax credit for hus repairs not modelled.</td></tr>
 <tr><td>Fastighetsavgift indexing</td><td>10 425 kr cap and 0.75% rate are for 2026; indexed annually.</td></tr>
-<tr><td>Tomträtt (leasehold land)</td><td>Ground rent not modelled — enter in "Other" monthly cost.</td></tr>
 <tr><td>Ägarlägenhet taxeringsvärde</td><td>Estimated at 75% of purchase price; actual assessment may differ.</td></tr>
 <tr><td>BRF financial health</td><td>BRF debt level and future månadsavgift changes not modelled.</td></tr>
 </tbody></table>
-<div class="footnote"><p><strong>Version 8 · Income year 2026</strong><br>Sources: Stämpelskattlagen (1984:404) · Inkomstskattelagen (1999:1229) · Finansinspektionens FFFS 2016:16 (repealed 1 Apr 2026) · Skatteverket · Lantmäteriet</p></div>
+<div class="footnote"><p><strong>Version 8 · Income year 2026</strong><br>Sources: Stämpelskattlagen (1984:404) · Inkomstskattelagen (1999:1229) · Skatteverket · Lantmäteriet</p></div>
 </div>
 
 <!-- ═══ SVENSKA ═══ -->
@@ -479,7 +395,7 @@ Fastighetsavgift /mån = round(årsbelopp / 12)</code></pre>
 <pre><code>Rörligt avdrag = bruttoinkomst * 20%
 Överskott = max(0, bruttoinkomst - 40 000 - rörligt_avdrag)
 Skatt     = round(överskott * 30%)</code></pre>
-<h3>B3.5 — Räkneexempel (Särimnervägen 3)</h3>
+<h3>B3.5 — Räkneexempel</h3>
 <table><thead><tr><th>Steg</th><th>Formel</th><th>Resultat</th></tr></thead><tbody>
 <tr><td>Köpeskilling</td><td>—</td><td>4 995 000 kr</td></tr>
 <tr><td>Kontantinsats</td><td>—</td><td>2 000 000 kr</td></tr>
@@ -531,7 +447,7 @@ Skatt     = round(överskott * 30%)</code></pre>
 <li class="sub"><a href="#a7f">الف۷. تحلیل پیشرفته — هزینه فرصت و افزایش ارزش</a></li>
 <li style="margin-top:8px"><strong>بخش ب — بر اساس نوع ملک</strong></li>
 <li class="sub"><a href="#b1f">ب۱. آپارتمان مالکیتی (Ägarlägenhet)</a></li>
-<li class="sub"><a href="#b2f">ب۲. حق استفاده تعاونی (Bostadärtt)</a></li>
+<li class="sub"><a href="#b2f">ب۲. حق استفاده تعاونی (Bostadsrätt)</a></li>
 <li class="sub"><a href="#b3f">ب۳. خانه / ویلا (Hus / Villa)</a></li>
 <li style="margin-top:8px"><strong>بخش پ — مرجع</strong></li>
 <li class="sub"><a href="#c1f">پ۱. ساده‌سازی‌های شناخته‌شده</a></li>
@@ -664,7 +580,7 @@ fastighetsavgift سالانه = min(taxvärde * 0.75٪, 10 425 کرون)
 <pre><code>کسر BRF           = månadsavgift * 12
 مازاد مشمول مالیات = max(0, درآمد_ناخالص - 40 000 - کسر_BRF)
 مالیات             = round(مازاد * 30٪)</code></pre>
-<div class="callout"><strong>تفاوت کلیدی:</strong> Bostadsrätt: کسر = <em>månadsavgift × 12</em>. Ägarlägenhet/Hus: کسر = <em>درآمد × 20٪</u200c</em>. månadsavgift بالا می‌تواند مالیات اجاره را کاملاً حذف کند.</div>
+<div class="callout"><strong>تفاوت کلیدی:</strong> Bostadsrätt: کسر = <em>månadsavgift × 12</em>. Ägarlägenhet/Hus: کسر = <em>درآمد × 20٪</em>. månadsavgift بالا می‌تواند مالیات اجاره را کاملاً حذف کند.</div>
 <h3>ب۲.۵ — مثال عددی</h3>
 <table><thead><tr><th>مرحله</th><th>فرمول</th><th>نتیجه</th></tr></thead><tbody>
 <tr><td>قیمت خرید</td><td>—</td><td>2 800 000 کرون</td></tr>
@@ -697,7 +613,7 @@ Pantbrev = round(max(0, وام_جدید - pantbrev_موجود) * 2٪) + 375 کر
 <pre><code>کسر متغیر = درآمد_ناخالص * 20٪
 مازاد    = max(0, درآمد - 40 000 - کسر_متغیر)
 مالیات   = round(مازاد * 30٪)</code></pre>
-<h3>ب۳.۵ — مثال عددی (Särimnervägen 3)</h3>
+<h3>ب۳.۵ — مثال عددی</h3>
 <table><thead><tr><th>مرحله</th><th>فرمول</th><th>نتیجه</th></tr></thead><tbody>
 <tr><td>قیمت خرید</td><td>—</td><td>4 995 000 کرون</td></tr>
 <tr><td>پیش‌پرداخت</td><td>—</td><td>2 000 000 کرون</td></tr>
@@ -727,7 +643,7 @@ Pantbrev = round(max(0, وام_جدید - pantbrev_موجود) * 2٪) + 375 کر
 <tr><td>Uppskov (تعویق مالیات)</td><td>تعویق مالیات سود سرمایه مدل‌سازی نمی‌شود.</td></tr>
 <tr><td>ROT-avdrag</td><td>اعتبار مالیاتی 30٪ برای تعمیر خانه مدل‌سازی نمی‌شود.</td></tr>
 <tr><td>شاخص‌بندی Fastighetsavgift</td><td>سقف 10 425 کرون و نرخ 0.75٪ برای سال 2026، سالانه شاخص‌بندی می‌شود.</td></tr>
-<tr><td>Tomträtt (زمین اجاری)</td><td>اجاره زمین مدل‌سازی نمی‌شود — در فیلد “سایر” وارد کنید.</td></tr>
+<tr><td>Tomträtt (زمین اجاری)</td><td>اجاره زمین مدل‌سازی نمی‌شود — در فیلد "سایر" وارد کنید.</td></tr>
 <tr><td>Taxeringsvärde آپارتمان مالکیتی</td><td>75٪ قیمت خرید تخمین زده شده، ارزیابی واقعی ممکن است متفاوت باشد.</td></tr>
 <tr><td>سلامت مالی BRF</td><td>سطح بدهی و افزایش‌های آینده månadsavgift مدل‌سازی نمی‌شوند.</td></tr>
 </tbody></table>
@@ -736,38 +652,5 @@ Pantbrev = round(max(0, وام_جدید - pantbrev_موجود) * 2٪) + 375 کر
 
 </div><!-- /container -->
 
-<script>
-function setLang(lang) {
-  ['en','sv','fa'].forEach(function(l) {
-    var sec = document.getElementById('sec-'+l);
-    if (sec) sec.style.display = (l === lang) ? '' : 'none';
-    var btn = document.getElementById('btn-'+l);
-    if (btn) btn.classList.toggle('active', l === lang);
-  });
-  document.documentElement.lang = lang;
-  // RTL for Farsi
-  var fa = document.getElementById('sec-fa');
-  if (fa) {
-    fa.style.direction = (lang === 'fa') ? 'rtl' : '';
-  }
-  var subs = {
-    en: 'Methodology &amp; Formula Reference &nbsp;&middot;&nbsp; Income year 2026 &nbsp;&middot;&nbsp; Version 8',
-    sv: 'Metodologi &amp; Formelreferens &nbsp;&middot;&nbsp; Inkomst&#229;r 2026 &nbsp;&middot;&nbsp; Version 8',
-    fa: '&#1585;&#1608;&#1588;&#8204;&#1588;&#1606;&#1575;&#1587;&#1740; &#1608; &#1605;&#1585;&#1580;&#1593; &#1601;&#1585;&#1605;&#1608;&#1604;&#8204;&#1607;&#1575; &nbsp;&middot;&nbsp; &#1587;&#1575;&#1604; &#1605;&#1575;&#1604;&#1740; &#x06F2;&#x06F0;&#x06F2;&#x06F6; &nbsp;&middot;&nbsp; &#1606;&#1587;&#1582;&#1607; &#x06F8;'
-  };
-  var sub = document.getElementById('msub');
-  if (sub) sub.innerHTML = subs[lang] || subs['en'];
-  try { localStorage.setItem('methLang', lang); } catch(e) {}
-  window.scrollTo(0, 0);
-}
-
-// Restore saved language on load
-(function() {
-  var saved = 'en';
-  try { saved = localStorage.getItem('methLang') || 'en'; } catch(e) {}
-  if (['en','sv','fa'].indexOf(saved) < 0) saved = 'en';
-  setLang(saved);
-})();
-</script>
 </body>
 </html>

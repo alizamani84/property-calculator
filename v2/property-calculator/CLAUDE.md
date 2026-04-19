@@ -8,24 +8,35 @@ All commands must be run from `v2/property-calculator/`:
 
 ```bash
 npm run dev              # Vite dev server (hot reload) — serves index.html
-npm run build            # Build both outputs: calculator + methodology
-npm run build:calc       # Build calculator only  → ../dist/index.html
-npm run build:method     # Build methodology only → ../dist/methodology.html
+npm run build            # Build both outputs and copy to v2/
+npm run build:calc       # Build calculator only  → v2/calculator.html
+npm run build:method     # Build methodology only → v2/methodology.html
 npm run preview          # Preview last build
 ```
 
-The final deliverables are copied from `v2/dist/` to the repo root:
-
-- `v2/dist/index.html` → `Property_Calculator_v2.html`
-- `v2/dist/methodology.html` → `Property_Calculator_Methodology_v2.html`
-
-This copy step is manual — do it after each build.
+Each build script compiles via Vite into `v2/dist/` and then copies the result to `v2/` with the correct name. The `v2/dist/` folder is gitignored; `v2/calculator.html` and `v2/methodology.html` are the committed built outputs.
 
 ## Repository Layout
 
-- `v1 All-in-One/` — legacy monolithic HTML files (not actively developed)
-- `v2/property-calculator/` — active Vite-based source code
-- `v2/dist/` — build output (generated, not hand-edited)
+```
+property-calculator/
+├── README.md
+├── .gitignore
+├── skills/                        — Claude Cowork skill files
+├── v1/                            — legacy monolithic single-file HTML (read-only reference)
+│   ├── calculator.html
+│   └── methodology.html
+└── v2/
+    ├── calculator.html            — built output (committed)
+    ├── methodology.html           — built output (committed)
+    └── property-calculator/       — Vite source (edit here)
+        ├── CLAUDE.md
+        ├── index.html
+        ├── methodology.html
+        ├── vite.config.js
+        ├── package.json
+        └── src/
+```
 
 ## Architecture Overview
 
