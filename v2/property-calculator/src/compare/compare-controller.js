@@ -291,8 +291,9 @@ function renderCompareDialog() {
 
   const formatSek = n => n ? (+n).toLocaleString('sv-SE') + ' kr' : '';
   const formatDate = s => s ? new Date(s).toLocaleDateString('sv-SE', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
-  const typeMap = { agarlagenhet: 'Ägarlägenhet', bostadsratt: 'Bostadsrätt', hus: 'Hus/Villa' };
-  const typeColor = pt => pt === 'bostadsratt' ? '#7B3A10' : pt === 'hus' ? '#375623' : '#1F3864';
+  const typeMap = { agarlagenhet: '🏢 Ägarlägenhet', bostadsratt: '🏘️ Bostadsrätt', hus: '🏡 Villa / Radhus / Kedjehus / Parhus' };
+  const typeBg  = pt => pt === 'bostadsratt' ? '#fff3e0' : pt === 'hus' ? '#e8f5e9' : '#e8f0fb';
+  const typeFg  = pt => pt === 'bostadsratt' ? '#7B3A10' : pt === 'hus' ? '#1a5c1a' : '#1F3864';
 
   // Group items by property label
   const propertyGroups = new Map();
@@ -311,7 +312,7 @@ function renderCompareDialog() {
     const anyChecked = group.some(item => item.checked);
     const hasCurrent = group.some(item => item.isCurrent);
 
-    const typeBadge = `<span style="background:${typeColor(propertyType)};color:#fff;border-radius:4px;font-size:10px;font-weight:700;padding:1px 7px;">${typeLabel}</span>`;
+    const typeBadge = `<span style="background:${typeBg(propertyType)};color:${typeFg(propertyType)};border-radius:8px;font-size:10px;font-weight:700;padding:2px 8px;">${typeLabel}</span>`;
     const currentBadge = hasCurrent ? `<span class="cmpd-current-badge">● active</span>` : '';
     const datePart = firstItem.savedAt ? `<span style="color:#9aabb8">· ${formatDate(firstItem.savedAt)}</span>` : '';
 

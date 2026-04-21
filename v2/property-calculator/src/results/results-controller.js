@@ -175,14 +175,10 @@ export function renderSavesList() {
     const dateStr = new Date(session.savedAt).toLocaleDateString('sv-SE', { year: 'numeric', month: 'short', day: 'numeric' });
     const priceStr = session.state?.purchasePrice ? session.state.purchasePrice.toLocaleString('sv-SE') + ' kr' : '';
     const propertyType = session.state?.propertyType;
-    let typeBadge;
-    if (propertyType === 'bostadsratt') {
-      typeBadge = `<span style="background:#e8f0fb;color:#1F3864;font-size:9px;font-weight:700;border-radius:8px;padding:2px 7px;margin-right:5px;white-space:nowrap">🏘️ Bostadsrätt</span>`;
-    } else if (propertyType === 'hus') {
-      typeBadge = `<span style="background:#e8f5e9;color:#1a5c1a;font-size:9px;font-weight:700;border-radius:8px;padding:2px 7px;margin-right:5px;white-space:nowrap">🏡 Villa / Radhus / Kedjehus / Parhus</span>`;
-    } else {
-      typeBadge = `<span style="background:#fff3e0;color:#7B3A10;font-size:9px;font-weight:700;border-radius:8px;padding:2px 7px;margin-right:5px;white-space:nowrap">🏢 Ägarlägenhet</span>`;
-    }
+    const ptBg    = propertyType === 'bostadsratt' ? '#fff3e0' : propertyType === 'hus' ? '#e8f5e9' : '#e8f0fb';
+    const ptFg    = propertyType === 'bostadsratt' ? '#7B3A10' : propertyType === 'hus' ? '#1a5c1a' : '#1F3864';
+    const ptLabel = propertyType === 'bostadsratt' ? '🏘️ Bostadsrätt' : propertyType === 'hus' ? '🏡 Villa / Radhus / Kedjehus / Parhus' : '🏢 Ägarlägenhet';
+    const typeBadge = `<span style="background:${ptBg};color:${ptFg};font-size:9px;font-weight:700;border-radius:8px;padding:2px 7px;margin-right:5px;white-space:nowrap">${ptLabel}</span>`;
     return `<div class="save-item" onclick="window.loadSession(${session.id})">
       <div>
         <div class="si-name">${escapeHtml(session.name)}</div>

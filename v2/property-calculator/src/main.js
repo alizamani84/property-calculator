@@ -151,8 +151,9 @@ function renderImportDialogContent() {
     );
     const hasConflict = !!existingMatch;
     const propType = session.state?.propertyType || session.propertyType || session.property?.type;
-    const badgeColor = propType === 'bostadsratt' ? '#1F3864' : propType === 'hus' ? '#375623' : '#7B3A10';
-    const badgeLabel = propType === 'bostadsratt' ? '🏘️ BRF' : propType === 'hus' ? '🏡 Hus' : '🏢 Ägarlägenhet';
+    const badgeBg    = propType === 'bostadsratt' ? '#fff3e0' : propType === 'hus' ? '#e8f5e9' : '#e8f0fb';
+    const badgeFg    = propType === 'bostadsratt' ? '#7B3A10' : propType === 'hus' ? '#1a5c1a' : '#1F3864';
+    const badgeLabel = propType === 'bostadsratt' ? '🏘️ Bostadsrätt' : propType === 'hus' ? '🏡 Villa / Radhus / Kedjehus / Parhus' : '🏢 Ägarlägenhet';
     const price = (session.state?.purchasePrice ?? session.purchasePrice ?? session.property?.purchase_price_sek ?? 0).toLocaleString('sv-SE');
     const name = session.name || session.sessionName || 'Unnamed';
     const date = session.savedAt ? new Date(session.savedAt).toLocaleDateString('sv-SE') : '';
@@ -162,7 +163,7 @@ function renderImportDialogContent() {
       <div class="imp-info">
         <div class="imp-name">${name}</div>
         <div class="imp-meta">
-          <span class="imp-badge" style="background:${badgeColor}">${badgeLabel}</span>
+          <span class="imp-badge" style="background:${badgeBg};color:${badgeFg}">${badgeLabel}</span>
           <span class="imp-price">${price} kr</span>
           ${date ? `<span class="imp-date">${date}</span>` : ''}
         </div>
@@ -511,11 +512,13 @@ window.confirmImport = confirmImport;
 // Compare
 window.openCmpDialog = openCompareDialog;
 window.closeCmpDialog = closeCompareDialog;
-window.toggleCmpItem = toggleCompareItem;
+window.toggleCmpItem = toggleCompareItem;          // kept for backwards compat
+window.toggleCompareItem = toggleCompareItem;       // used by renderCompareDialog HTML
 window.confirmCmpDialog = confirmCompareDialog;
 window.closeComparePage = closeComparePage;
 window.clearCompare = clearComparison;
-window.removeCmpItem = removeFromComparison;
+window.removeCmpItem = removeFromComparison;        // kept for backwards compat
+window.removeFromComparison = removeFromComparison; // used by renderComparisonTable HTML
 
 // Language
 window.setLang = (lang) => {

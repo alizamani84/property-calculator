@@ -391,7 +391,7 @@ body { font-family:Calibri,Arial,sans-serif; font-size:13px; background:#eef0f4;
 .imp-name{font-size:14px;font-weight:700;color:#1a2a3a;margin-bottom:4px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .imp-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;}
-.imp-badge{font-size:10px;font-weight:700;color:#fff;border-radius:4px;padding:2px 7px;}
+.imp-badge{font-size:10px;font-weight:700;border-radius:8px;padding:2px 7px;}
 .imp-price{font-size:11px;color:#4a6a9a;font-weight:600;}
 .imp-date{font-size:10px;color:#9ab0c8;}
 .imp-conflict{background:#fffbf0;border:1.5px solid #f0d080;border-radius:8px;
@@ -453,25 +453,24 @@ body { font-family:Calibri,Arial,sans-serif; font-size:13px; background:#eef0f4;
 .cmpd-head{background:#1F3864;padding:18px 20px 14px;flex-shrink:0;}
 .cmpd-head h2{font-size:15px;font-weight:700;color:#fff;margin:0 0 4px;}
 .cmpd-head p{font-size:11px;color:rgba(255,255,255,.68);margin:0;}
-.cmpd-body{overflow-y:auto;flex:1;}
+.cmpd-body{overflow-y:auto;flex:1;padding:8px 12px;}
 .cmpd-sep{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
   color:#5a7090;padding:11px 16px 6px;background:#f4f7fb;border-bottom:1px solid #dde6f0;
   border-top:1px solid #dde6f0;margin-top:1px;}
-.cmpd-prop-row{padding:13px 16px;border-bottom:1px solid #edf2f8;transition:background .1s;}
-.cmpd-prop-row:hover{background:#f8faff;}
-.cmpd-prop-row.any-checked{background:#ebf3ff;}
-.cmpd-item-name{font-size:13px;font-weight:600;color:#1a2a3a;margin-bottom:3px;}
-.cmpd-item-sub{font-size:11px;color:#6080a0;margin-bottom:9px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
-.cmpd-sc-btns{display:flex;gap:7px;flex-wrap:wrap;}
-.cmpd-sc-btn{padding:5px 14px;border-radius:20px;border:1.5px solid #c0d0e4;
-  background:#fff;color:#3a5a7a;font-size:11px;font-weight:700;cursor:pointer;
-  transition:all .15s;font-family:inherit;}
-.cmpd-sc-btn.active{background:#1F3864;border-color:#1F3864;color:#fff;
-  box-shadow:0 2px 6px rgba(31,56,100,.25);}
-.cmpd-sc-btn.best:not(.active){border-color:#2e7d32;color:#2e7d32;}
-.cmpd-sc-btn.best.active{background:#2e7d32;border-color:#2e7d32;}
-.cmpd-sc-btn:hover:not(.active):not(:disabled){background:#e8f0ff;border-color:#7090c0;}
-.cmpd-sc-btn.best:hover:not(.active):not(:disabled){background:#e8f5e9;border-color:#2e7d32;}
+.cmpd-prop-row{border:1.5px solid #dde;border-radius:8px;padding:10px 14px;margin-bottom:8px;transition:.15s;}
+.cmpd-prop-row:hover{border-color:#0070C0;background:#f0f6ff;}
+.cmpd-prop-row.any-checked{background:#ebf3ff;border-color:#90b0e0;}
+.cmpd-item-name{font-size:13px;font-weight:700;color:#1F3864;margin-bottom:3px;}
+.cmpd-item-sub{font-size:10px;color:#888;margin-top:2px;margin-bottom:9px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.cmpd-sc-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.cmpd-sc-btn{padding:3px 11px;border-radius:6px;border:1.5px solid #d0dce8;
+  background:#f4f7fa;color:#4a6480;font-size:11px;font-weight:600;cursor:pointer;
+  transition:all .15s;font-family:inherit;line-height:1.6;}
+.cmpd-sc-btn.active{background:#1F3864;border-color:#1F3864;color:#fff;}
+.cmpd-sc-btn.best:not(.active){border-color:#2e7d32;color:#2e7d32;background:#f0faf0;}
+.cmpd-sc-btn.best.active{background:#2e7d32;border-color:#2e7d32;color:#fff;}
+.cmpd-sc-btn:hover:not(.active):not(:disabled){background:#e8f0fb;border-color:#6090c0;color:#1F3864;}
+.cmpd-sc-btn.best:hover:not(.active):not(:disabled){background:#e0f5e0;border-color:#2e7d32;}
 .cmpd-sc-btn:disabled{opacity:.28;cursor:not-allowed;}
 .cmpd-current-badge{display:inline-block;margin-left:7px;background:#e8f0ff;
   color:#1F3864;border:1px solid #b8ccee;border-radius:10px;
@@ -4006,14 +4005,14 @@ function setImportChoice(idx, useImported, ev) {
 
 function renderImportDialog() {
   const typeMap   = {'agarlagenhet':'Ägarlägenhet','bostadsratt':'Bostadsrätt','hus':'Villa / Radhus / Kedjehus / Parhus'};
-  const typeColors= {'agarlagenhet':'#1F3864','bostadsratt':'#7B3A10','hus':'#375623'};
+  const typeColors= {'agarlagenhet':{'bg':'#e8f0fb','fg':'#1F3864'},'bostadsratt':{'bg':'#fff3e0','fg':'#7B3A10'},'hus':{'bg':'#e8f5e9','fg':'#1a5c1a'}};
   const checkedCnt = _importItems.filter(i => i.checked).length;
 
   let html = '';
   _importItems.forEach((item, idx) => {
     const pt     = item.propType || 'agarlagenhet';
     const ptLbl  = typeMap[pt] || 'Ägarlägenhet';
-    const ptColor= typeColors[pt] || '#1F3864';
+    const ptColor= typeColors[pt] || typeColors['agarlagenhet'];
     const priceStr = item.price ? item.price.toLocaleString('sv-SE') + ' kr' : '';
     const dateStr  = item.fileSavedAt
       ? new Date(item.fileSavedAt).toLocaleDateString('sv-SE',{year:'numeric',month:'short',day:'numeric'})
@@ -4049,7 +4048,7 @@ function renderImportDialog() {
         <div class="imp-info">
           <div class="imp-name">${esc(item.name)}</div>
           <div class="imp-meta">
-            <span class="imp-badge" style="background:${ptColor}">${ptLbl}</span>
+            <span class="imp-badge" style="background:${ptColor.bg};color:${ptColor.fg}">${ptLbl}</span>
             ${priceStr?`<span class="imp-price">${priceStr}</span>`:''}
             ${dateStr?`<span class="imp-date">· ${dateStr}</span>`:''}
           </div>
@@ -4167,11 +4166,10 @@ function renderSavesList() {
     const d=new Date(sv.savedAt).toLocaleDateString('sv-SE',{year:'numeric',month:'short',day:'numeric'});
     const pr=sv.state?.price?sv.state.price.toLocaleString('sv-SE')+' kr':'';
     const pt=sv.state?.propType;
-    const typeBadge = pt==='bostadsratt'
-      ? `<span style="background:#e8f0fb;color:#1F3864;font-size:9px;font-weight:700;border-radius:8px;padding:2px 7px;margin-right:5px;white-space:nowrap">🏘️ Bostadsrätt</span>`
-      : pt==='hus'
-      ? `<span style="background:#e8f5e9;color:#1a5c1a;font-size:9px;font-weight:700;border-radius:8px;padding:2px 7px;margin-right:5px;white-space:nowrap">🏡 Villa / Radhus / Kedjehus / Parhus</span>`
-      : `<span style="background:#fff3e0;color:#7B3A10;font-size:9px;font-weight:700;border-radius:8px;padding:2px 7px;margin-right:5px;white-space:nowrap">🏢 Ägarlägenhet</span>`;
+    const _ptBg    = pt==='bostadsratt'?'#fff3e0':pt==='hus'?'#e8f5e9':'#e8f0fb';
+    const _ptFg    = pt==='bostadsratt'?'#7B3A10':pt==='hus'?'#1a5c1a':'#1F3864';
+    const _ptLabel = pt==='bostadsratt'?'🏘️ Bostadsrätt':pt==='hus'?'🏡 Villa / Radhus / Kedjehus / Parhus':'🏢 Ägarlägenhet';
+    const typeBadge = `<span style="background:${_ptBg};color:${_ptFg};font-size:9px;font-weight:700;border-radius:8px;padding:2px 7px;margin-right:5px;white-space:nowrap">${_ptLabel}</span>`;
     return `<div class="save-item" onclick="loadFromLS(${sv.id})">
       <div>
         <div class="si-name">${esc(sv.name)}</div>
@@ -4382,8 +4380,9 @@ function _renderCmpDialog() {
 
   const kr      = n => n ? (+n).toLocaleString('sv-SE') + ' kr' : '';
   const fmtDate = s => s ? new Date(s).toLocaleDateString('sv-SE', {year:'numeric',month:'short',day:'numeric'}) : '';
-  const typeMap  = {agarlagenhet:'Ägarlägenhet', bostadsratt:'Bostadsrätt', hus:'Hus/Villa'};
-  const ptColor  = pt => pt==='bostadsratt'?'#7B3A10':pt==='hus'?'#375623':'#1F3864';
+  const typeMap  = {agarlagenhet:'🏢 Ägarlägenhet', bostadsratt:'🏘️ Bostadsrätt', hus:'🏡 Villa / Radhus / Kedjehus / Parhus'};
+  const ptBg     = pt => pt==='bostadsratt'?'#fff3e0':pt==='hus'?'#e8f5e9':'#e8f0fb';
+  const ptFg     = pt => pt==='bostadsratt'?'#7B3A10':pt==='hus'?'#1a5c1a':'#1F3864';
 
   // One row per property — alt buttons inline
   function renderPropRow(group) {
@@ -4394,7 +4393,7 @@ function _renderCmpDialog() {
     const hasCurrent = group.some(i => i.isCurrent);
 
     // Meta line: type badge · price · date · current badge
-    const typeBadge    = `<span style="background:${ptColor(pt)};color:#fff;border-radius:4px;font-size:10px;font-weight:700;padding:1px 7px;">${ptLbl}</span>`;
+    const typeBadge    = `<span style="background:${ptBg(pt)};color:${ptFg(pt)};border-radius:8px;font-size:10px;font-weight:700;padding:2px 8px;">${ptLbl}</span>`;
     const currentBadge = hasCurrent ? `<span class="cmpd-current-badge">● active</span>` : '';
     const datePart     = first.savedAt ? `<span style="color:#9aabb8">· ${fmtDate(first.savedAt)}</span>` : '';
 
