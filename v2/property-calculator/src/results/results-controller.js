@@ -9,6 +9,7 @@ import { loadSessions, deleteSession, findSession, loadAutosavedSession, clearAu
 import { setResultsAreVisible } from '../wizard/wizard-controller.js';
 import { escapeHtml, formatAsCurrency } from '../utils/formatters.js';
 import { renderAllSections } from './results-renderer.js';
+import { renderWelcomeMap } from '../map/welcome-map.js';
 
 /** Whether there are unsaved changes to the current calculation. */
 let hasUnsavedChanges = false;
@@ -90,14 +91,18 @@ export function showResults() {
 function renderLinksBar() {
   const bar = document.getElementById('linksBar');
   if (!bar) return;
-  if (!appState.propertyLinks || !appState.propertyLinks.length) {
-    bar.classList.add('empty');
-    return;
-  }
+  const links = appState.propertyLinks || [];
+  const name  = appState.propertyName || '';
+  const mapsUrl = name
+    ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name)
+    : null;
+  if (!links.length && !mapsUrl) { bar.classList.add('empty'); return; }
   bar.classList.remove('empty');
-  bar.innerHTML = '🔗 ' + appState.propertyLinks.map(link =>
+  const mapsLink  = mapsUrl ? `<a href="${mapsUrl}" target="_blank" rel="noopener">📍 Google Maps</a>` : '';
+  const otherLinks = links.map(link =>
     `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener">${escapeHtml(link.label || link.lbl || link.url)}</a>`
   ).join('');
+  bar.innerHTML = '🔗 ' + [mapsLink, otherLinks].filter(Boolean).join('');
 }
 
 /**
@@ -166,6 +171,11 @@ export function renderSavesList() {
   if (!listElement) return;
 
   const sessions = loadSessions();
+
+  // Render map with all sessions (async — non-blocking)
+  window.__mapLoadSession = (id) => loadSessionById(id);
+  renderWelcomeMap(sessions, loadSessionById);
+
   if (!sessions.length) {
     listElement.innerHTML = '<div class="no-saves">No saved calculations yet</div>';
     return;

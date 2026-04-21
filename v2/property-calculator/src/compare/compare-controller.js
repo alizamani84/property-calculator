@@ -7,6 +7,7 @@ import { appState } from '../state/app-state.js';
 import { loadSessions } from '../state/session-storage.js';
 import { showToast } from '../results/results-controller.js';
 import { escapeHtml } from '../utils/formatters.js';
+import { translate } from '../i18n/i18n-manager.js';
 
 /** localStorage key for the comparison list. */
 const COMPARE_KEY = 'swe-prop-calc-compare';
@@ -281,12 +282,14 @@ export function confirmCompareDialog() {
 function renderCompareDialog() {
   const checkedCount = compareDialogItems.filter(item => item.checked).length;
   const countLabel = document.getElementById('cmpdCount');
-  if (countLabel) countLabel.textContent = checkedCount + ' of 4 selected';
+  if (countLabel) countLabel.textContent = checkedCount + ' ' + translate('cmpd_of4');
 
   const goButton = document.getElementById('cmpdGoBtn');
   if (goButton) {
     goButton.disabled = checkedCount < 2;
-    goButton.textContent = checkedCount >= 2 ? 'Compare (' + checkedCount + ' selected)' : 'Select at least 2';
+    goButton.textContent = checkedCount >= 2
+      ? translate('compare') + ' (' + checkedCount + ')'
+      : translate('cmpd_select_min');
   }
 
   const formatSek = n => n ? (+n).toLocaleString('sv-SE') + ' kr' : '';
@@ -303,7 +306,10 @@ function renderCompareDialog() {
   });
 
   const propCount = propertyGroups.size;
-  let html = `<div class="cmpd-sep">${propCount} propert${propCount === 1 ? 'y' : 'ies'} available</div>`;
+  const availLabel = propCount === 1
+    ? translate('cmpd_prop_avail_1')
+    : translate('cmpd_prop_avail_n').replace('{n}', propCount);
+  let html = `<div class="cmpd-sep">${availLabel}</div>`;
 
   propertyGroups.forEach(group => {
     const firstItem = group[0];
@@ -313,7 +319,7 @@ function renderCompareDialog() {
     const hasCurrent = group.some(item => item.isCurrent);
 
     const typeBadge = `<span style="background:${typeBg(propertyType)};color:${typeFg(propertyType)};border-radius:8px;font-size:10px;font-weight:700;padding:2px 8px;">${typeLabel}</span>`;
-    const currentBadge = hasCurrent ? `<span class="cmpd-current-badge">● active</span>` : '';
+    const currentBadge = hasCurrent ? `<span class="cmpd-current-badge">${translate('cmpd_active')}</span>` : '';
     const datePart = firstItem.savedAt ? `<span style="color:#9aabb8">· ${formatDate(firstItem.savedAt)}</span>` : '';
 
     // Find best alternative by monthly take-home
@@ -331,8 +337,8 @@ function renderCompareDialog() {
       const isBest = bestTakeHome !== null && takeHomeValues[groupIndex] === bestTakeHome;
       return `<button class="cmpd-sc-btn${item.checked ? ' active' : ''}${isBest ? ' best' : ''}"
         onclick="event.stopPropagation();window.toggleCompareItem(${itemIndex})"
-        title="${isBest ? 'Highest monthly take-home' : ''}"
-        ${isDisabled ? 'disabled' : ''}>Alt. ${displayNum}${isBest ? ' ★' : ''}</button>`;
+        title="${isBest ? translate('cmpd_best_title') : ''}"
+        ${isDisabled ? 'disabled' : ''}>${translate('cmpd_alt')} ${displayNum}${isBest ? ' ★' : ''}</button>`;
     }).join('');
 
     html += `<div class="cmpd-prop-row${anyChecked ? ' any-checked' : ''}">
@@ -391,7 +397,9 @@ export function renderComparisonTable() {
   const subtitleElement = document.getElementById('cmp-count-sub');
   if (subtitleElement) {
     subtitleElement.textContent = compareList.length
-      ? compareList.length + (compareList.length === 1 ? ' property' : ' properties')
+      ? (compareList.length === 1
+          ? translate('cmpd_prop_avail_1')
+          : translate('cmpd_prop_avail_n').replace('{n}', compareList.length))
       : '';
   }
 
@@ -399,14 +407,15 @@ export function renderComparisonTable() {
   if (!contentElement) return;
 
   if (!compareList.length) {
-    contentElement.innerHTML = `<div class="cmp-empty">Nothing to compare yet.<br>Click <b>📊 Compare</b> on the results page to select properties.</div>`;
+    const [line1, line2] = translate('cmpd_empty').split('\n');
+    contentElement.innerHTML = `<div class="cmp-empty">${line1}<br>${line2 || ''}</div>`;
     return;
   }
 
   const formatSek = n => Math.round(n).toLocaleString('sv-SE') + ' kr';
   const formatPct = (n, d = 2) => n.toFixed(d) + '%';
 
-  const altBadge = altNum => `<span class="cmp-sc-badge sc-b${altNum}">Alt. ${altNum}</span>`;
+  const altBadge = altNum => `<span class="cmp-sc-badge sc-b${altNum}">${translate('cmpd_alt')} ${altNum}</span>`;
 
   function markBest(values, lowerIsBetter) {
     const numbers = values.map(v => typeof v === 'number' ? v : null);
@@ -416,30 +425,31 @@ export function renderComparisonTable() {
     return numbers.map(n => n === null ? { cssClass: '' } : { num: n, cssClass: n === bestValue ? 'cmp-best' : '' });
   }
 
+  const t = k => translate(k);
   const tableRows = [
-    { section: 'Property' },
-    { label: 'Purchase price',             values: compareList.map(i => i.price),               format: formatSek, noMark: true },
-    { label: 'Down payment',               values: compareList.map(i => i.downPayment),          format: formatSek, lowerBetter: true },
-    { label: 'Lagfart (stamp duty)',        values: compareList.map(i => i.lagfart),              format: formatSek, lowerBetter: true },
-    { label: 'Pantbrev (mortgage deed)',    values: compareList.map(i => i.pantbrev),             format: formatSek, lowerBetter: true },
-    { label: 'Total cash at purchase',      values: compareList.map(i => i.totalCash),            format: formatSek, lowerBetter: true, isKey: true },
-    { section: 'Loan structure' },
-    { label: 'New bank mortgage',           values: compareList.map(i => i.newLoan),              format: formatSek, noMark: true },
-    { label: 'Extra loan (existing apt)',   values: compareList.map(i => i.extraLoan),            format: formatSek, noMark: true },
-    { label: 'New loan LTV',               values: compareList.map(i => i.ltv),                  format: n => formatPct(n, 1), lowerBetter: true },
-    { label: 'Monthly interest (total)',    values: compareList.map(i => i.totalMonthlyInterest), format: formatSek, lowerBetter: true },
-    { label: 'Monthly amortization',        values: compareList.map(i => i.totalMonthlyAmort),    format: formatSek, noMark: true },
-    { section: 'Monthly cash flow' },
-    { label: 'Monthly rent income',         values: compareList.map(i => i.monthlyRent),          format: formatSek },
-    { label: 'Monthly owner cost',          values: compareList.map(i => i.monthlyOwnershipCost), format: formatSek, lowerBetter: true },
-    { label: 'Total monthly cost',          values: compareList.map(i => i.totalMonthlyCost),     format: formatSek, lowerBetter: true },
-    { label: 'Monthly take-home after tax', values: compareList.map(i => i.monthlyTakeHome),      format: formatSek, isKey: true },
-    { section: 'Annual returns' },
-    { label: 'Annual rental tax',           values: compareList.map(i => i.annualRentalTax),      format: formatSek, lowerBetter: true },
-    { label: 'Annual return after tax',     values: compareList.map(i => i.annualReturnAfterTax), format: formatSek, isKey: true },
-    { label: 'ROI on invested capital',     values: compareList.map(i => i.roi),                  format: n => formatPct(n, 2), isKey: true },
-    { label: 'Net property yield',          values: compareList.map(i => i.netYield),             format: n => formatPct(n, 2) },
-    { label: 'Gross rental yield',          values: compareList.map(i => i.grossYield),           format: n => formatPct(n, 2) },
+    { section: t('cmpd_sec_property') },
+    { label: t('cmpd_row_price'),      values: compareList.map(i => i.price),               format: formatSek, noMark: true },
+    { label: t('cmpd_row_down'),       values: compareList.map(i => i.downPayment),          format: formatSek, lowerBetter: true },
+    { label: t('cmpd_row_lagfart'),    values: compareList.map(i => i.lagfart),              format: formatSek, lowerBetter: true },
+    { label: t('cmpd_row_pantbrev'),   values: compareList.map(i => i.pantbrev),             format: formatSek, lowerBetter: true },
+    { label: t('cmpd_row_total_cash'), values: compareList.map(i => i.totalCash),            format: formatSek, lowerBetter: true, isKey: true },
+    { section: t('cmpd_sec_loan') },
+    { label: t('cmpd_row_new_mort'),   values: compareList.map(i => i.newLoan),              format: formatSek, noMark: true },
+    { label: t('cmpd_row_extra_loan'), values: compareList.map(i => i.extraLoan),            format: formatSek, noMark: true },
+    { label: t('cmpd_row_ltv'),        values: compareList.map(i => i.ltv),                  format: n => formatPct(n, 1), lowerBetter: true },
+    { label: t('cmpd_row_int'),        values: compareList.map(i => i.totalMonthlyInterest), format: formatSek, lowerBetter: true },
+    { label: t('cmpd_row_amort'),      values: compareList.map(i => i.totalMonthlyAmort),    format: formatSek, noMark: true },
+    { section: t('cmpd_sec_monthly') },
+    { label: t('cmpd_row_rent'),       values: compareList.map(i => i.monthlyRent),          format: formatSek },
+    { label: t('cmpd_row_owner'),      values: compareList.map(i => i.monthlyOwnershipCost), format: formatSek, lowerBetter: true },
+    { label: t('cmpd_row_tot_mth'),    values: compareList.map(i => i.totalMonthlyCost),     format: formatSek, lowerBetter: true },
+    { label: t('cmpd_row_takehome'),   values: compareList.map(i => i.monthlyTakeHome),      format: formatSek, isKey: true },
+    { section: t('cmpd_sec_annual') },
+    { label: t('cmpd_row_ann_tax'),    values: compareList.map(i => i.annualRentalTax),      format: formatSek, lowerBetter: true },
+    { label: t('cmpd_row_ann_ret'),    values: compareList.map(i => i.annualReturnAfterTax), format: formatSek, isKey: true },
+    { label: t('cmpd_row_roi'),        values: compareList.map(i => i.roi),                  format: n => formatPct(n, 2), isKey: true },
+    { label: t('cmpd_row_net_yield'),  values: compareList.map(i => i.netYield),             format: n => formatPct(n, 2) },
+    { label: t('cmpd_row_gross'),      values: compareList.map(i => i.grossYield),           format: n => formatPct(n, 2) },
   ];
 
   const colCount = compareList.length;
@@ -453,7 +463,7 @@ export function renderComparisonTable() {
       <div class="cmp-prop-name">${escapeHtml(item.propertyName)}</div>
       ${altBadge(item.altNum)}
       <div style="font-size:10px;opacity:.62;margin-top:4px;color:#fff">${escapeHtml(item.scenarioLabel.replace(/Financing Alt\. \d — /, ''))}</div>
-      <button class="cmp-remove" onclick="window.removeFromComparison('${item.id}')">✕ Remove</button>
+      <button class="cmp-remove" onclick="window.removeFromComparison('${item.id}')">${translate('cmpd_remove')}</button>
     </th>`;
   });
   tableHtml += `</tr></thead><tbody>`;
@@ -474,9 +484,15 @@ export function renderComparisonTable() {
   });
 
   tableHtml += `</tbody></table></div></div>
-    <div style="text-align:center;margin-top:12px;font-size:11px;color:#667">
-      Green = best value in each row &nbsp;·&nbsp; Click <b>📊 Change selection</b> to modify the comparison
-    </div>`;
+    <div style="text-align:center;margin-top:12px;font-size:11px;color:#667">${translate('cmpd_footer')}</div>`;
 
   contentElement.innerHTML = tableHtml;
 }
+
+// Re-render compare UI whenever language changes
+document.addEventListener('languageChanged', () => {
+  const comparePageVisible = document.getElementById('comparePage')?.classList.contains('show');
+  const compareDialogVisible = !document.getElementById('cmpdOverlay')?.classList.contains('hidden');
+  if (comparePageVisible) renderComparisonTable();
+  if (compareDialogVisible) renderCompareDialog();
+});

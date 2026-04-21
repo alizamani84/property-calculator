@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Swedish Property Investment Calculator</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231F3864' width='100' height='100'/><path d='M50 15 L75 40 L72 40 L72 70 Q72 75 67 75 L33 75 Q28 75 28 70 L28 40 L25 40 Z' fill='%23fff' stroke='%231F3864' stroke-width='2'/><rect x='35' y='45' width='12' height='15' fill='%231F3864'/><rect x='53' y='45' width='12' height='15' fill='%231F3864'/><rect x='44' y='60' width='10' height='10' fill='%231F3864'/></svg>">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 * { box-sizing:border-box; margin:0; padding:0; }
 body { font-family:Calibri,Arial,sans-serif; font-size:13px; background:#eef0f4; color:#222; }
@@ -561,6 +563,9 @@ body { font-family:Calibri,Arial,sans-serif; font-size:13px; background:#eef0f4;
   <div class="step-desc">Compare financing alternatives for Swedish properties — ägarlägenhet, bostadsrätt, and hus/villa. Monthly take-home, ROI, rental tax, and more. All Swedish rules built in.</div>
 
   <div id="lastSessionBanner" style="display:none;margin-bottom:10px"></div>
+
+  <div id="welcomeMap" style="display:none;height:240px;border-radius:10px;overflow:hidden;margin-bottom:10px;border:1px solid #dde"></div>
+  <div id="welcomeMapStatus" style="display:none;font-size:11px;color:#888;margin:-6px 0 8px;text-align:center"></div>
 
   <div class="wsep" data-i18n="recentCalcs">Recent calculations</div>
   <div id="savesList"></div>
@@ -2668,6 +2673,8 @@ function openWiz() {
   _wizOrigState = S.price > 0 ? {...S} : null;
   prefill(); // also calls updateWizardForType()
   updateOneCostsPlaceholders(); // sync placeholders with pre-filled price/dp
+  // Always start at step 1 (property details) when editing — never the welcome screen
+  if (S.step === 0) S.step = 1;
   document.getElementById('wizOverlay').classList.remove('hidden');
   renderWizStep();
 }
@@ -3103,11 +3110,14 @@ function showResults() {
 
 function renderLinksBar() {
   const bar = document.getElementById('linksBar');
-  if (!S.links.length) { bar.classList.add('empty'); return; }
+  const mapsUrl = S.propName
+    ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(S.propName)
+    : null;
+  if (!S.links.length && !mapsUrl) { bar.classList.add('empty'); return; }
   bar.classList.remove('empty');
-  bar.innerHTML = '🔗 ' + S.links.map(l =>
-    `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.lbl||l.url)}</a>`
-  ).join('');
+  const mapsLink   = mapsUrl ? `<a href="${mapsUrl}" target="_blank" rel="noopener">📍 Google Maps</a>` : '';
+  const otherLinks = S.links.map(l => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.lbl||l.url)}</a>`).join('');
+  bar.innerHTML = '🔗 ' + [mapsLink, otherLinks].filter(Boolean).join('');
 }
 
 /* openWiz (edit mode) — the full version at line ~1357 is the one that runs */
@@ -4161,6 +4171,8 @@ function renderLastSessionBanner() {
 function renderSavesList() {
   const saves=getSaves();
   const el=document.getElementById('savesList');
+  // Render map (async, non-blocking)
+  if (typeof renderWelcomeMap === 'function') renderWelcomeMap(saves);
   if(!saves.length){el.innerHTML='<div class="no-saves">No saved calculations yet</div>';return;}
   el.innerHTML=saves.map(sv=>{
     const d=new Date(sv.savedAt).toLocaleDateString('sv-SE',{year:'numeric',month:'short',day:'numeric'});
@@ -4803,6 +4815,87 @@ function applyImportedListing(d, url) {
 renderWizStep();
 applyZoom(uiZoom);
 initTooltips();
+
+/* ══════════════════════════════════════════════════════════════════
+   WELCOME MAP  (Leaflet + OpenStreetMap + Nominatim geocoding)
+══════════════════════════════════════════════════════════════════ */
+(function() {
+  const GEOCACHE_KEY = 'swe-prop-geocache-v1';
+  const TYPE_COLOR   = { bostadsratt:'#7B3A10', hus:'#1a5c1a', agarlagenhet:'#1F3864' };
+  const TYPE_LABEL   = { bostadsratt:'🏘️ Bostadsrätt', hus:'🏡 Hus / Villa', agarlagenhet:'🏢 Ägarlägenhet' };
+
+  function loadCache() { try { return JSON.parse(localStorage.getItem(GEOCACHE_KEY)||'{}'); } catch { return {}; } }
+  function saveCache(c) { try { localStorage.setItem(GEOCACHE_KEY, JSON.stringify(c)); } catch {} }
+
+  async function geocode(addr, cache) {
+    if (addr in cache) return cache[addr];
+    await new Promise(r => setTimeout(r, 250));
+    try {
+      const data = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=se&q=' + encodeURIComponent(addr), { headers:{'Accept-Language':'sv'} }).then(r=>r.json());
+      const res  = data[0] ? { lat:parseFloat(data[0].lat), lng:parseFloat(data[0].lon) } : null;
+      cache[addr] = res; saveCache(cache); return res;
+    } catch { return null; }
+  }
+
+  function dotIcon(pt) {
+    const c = TYPE_COLOR[pt]||'#1F3864';
+    return L.divIcon({ html:`<div style="background:${c};width:14px;height:14px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.45)"></div>`, className:'', iconSize:[14,14], iconAnchor:[7,7], popupAnchor:[0,-10] });
+  }
+
+  let _map = null;
+
+  window.renderWelcomeMap = async function(saves) {
+    const el = document.getElementById('welcomeMap');
+    if (!el || typeof L === 'undefined') return;
+    el.style.display = 'block';
+    if (!_map) {
+      _map = L.map('welcomeMap', { scrollWheelZoom:true }).setView([59.85, 17.65], 7);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution:'© <a href="https://www.openstreetmap.org/" target="_blank">OpenStreetMap</a> © <a href="https://carto.com/" target="_blank">CARTO</a>', subdomains:'abcd', maxZoom:19 }).addTo(_map);
+    }
+    setTimeout(() => _map.invalidateSize(), 50);
+    _map.eachLayer(l => { if (l instanceof L.Marker) _map.removeLayer(l); });
+    if (!saves || !saves.length) return;
+
+    const status = document.getElementById('welcomeMapStatus');
+    if (status) { status.textContent='⏳ Locating properties…'; status.style.display='block'; }
+
+    const cache = loadCache(), markers = [];
+    for (const sv of saves) {
+      const st  = sv.state||{};
+      const nm  = sv.name || st.propName || '';
+      const pt  = st.propType || 'agarlagenhet';
+      const pr  = (st.price||0).toLocaleString('sv-SE');
+      if (!nm) continue;
+      const coords = await geocode(nm, cache);
+      if (!coords) continue;
+      const isBr  = pt === 'bostadsratt';
+      const isHus = pt === 'hus';
+      const baseMonthly = isBr
+        ? (st.monthlyManavgift||0) + (st.monthlyDriftkostnad||0)
+        : isHus
+          ? Math.round((st.annualHusRunningCosts||0) / 12)
+          : (st.monthlyGaFee||0);
+      const utilities = (st.monthlyInsurance||0) + (st.monthlyWater||0)
+        + (st.monthlyElectricity||0) + (st.monthlyHeating||0) + (st.monthlyOtherCosts||0);
+      const totalDrift = baseMonthly + utilities;
+      const driftStr = totalDrift > 0
+        ? `<div style="color:#555;font-size:11px;margin-top:1px">Drift: ${totalDrift.toLocaleString('sv-SE')} kr/mån</div>`
+        : '';
+      const m = L.marker([coords.lat, coords.lng], { icon:dotIcon(pt) }).addTo(_map).bindPopup(`
+        <div style="font-size:12px;min-width:160px;line-height:1.5">
+          <div style="font-weight:700;color:#1F3864;margin-bottom:4px">${esc(nm)}</div>
+          <div style="display:inline-block;background:${TYPE_COLOR[pt]||'#1F3864'};color:#fff;font-size:10px;font-weight:700;border-radius:4px;padding:1px 6px;margin-bottom:4px">${TYPE_LABEL[pt]||''}</div>
+          <div style="color:#555;font-size:11px">${pr} kr</div>
+          ${driftStr}
+          <button onclick="loadFromLS(${sv.id})" style="margin-top:8px;width:100%;padding:4px 0;background:#1F3864;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600">Open →</button>
+        </div>`);
+      markers.push(m);
+    }
+    if (status) { if (markers.length) { status.style.display='none'; } else { status.textContent='ℹ️ Addresses not found on map'; } }
+    if (markers.length === 1) { const ll=markers[0].getLatLng(); _map.setView([ll.lat,ll.lng],13); }
+    else if (markers.length > 1) { _map.fitBounds(L.featureGroup(markers).getBounds().pad(0.35)); }
+  };
+})();
 </script>
 
 <!-- Language Selector -->

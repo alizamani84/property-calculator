@@ -9,6 +9,8 @@
 <link rel="stylesheet" href="src/styles/wizard.css">
 <link rel="stylesheet" href="src/styles/results.css">
 <link rel="stylesheet" href="src/styles/components.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
 <body>
 
@@ -42,28 +44,41 @@
 
 <!-- STEP 0: Welcome -->
 <div class="wiz-step active" id="wstep-0">
-  <h2>Welcome 🏠</h2>
-  <div class="step-desc">Compare financing alternatives for Swedish properties — ägarlägenhet, bostadsrätt, and hus/villa. Monthly take-home, ROI, rental tax, and more. All Swedish rules built in.</div>
+  <div class="welcome-layout">
 
-  <div id="lastSessionBanner" style="display:none;margin-bottom:10px"></div>
+    <!-- LEFT: Map -->
+    <div class="welcome-map-col">
+      <div id="welcomeMap" style="display:none;height:100%;min-height:320px;border-radius:10px;overflow:hidden;border:1px solid #dde"></div>
+      <div id="welcomeMapStatus" style="display:none;font-size:11px;color:#888;margin-top:6px;text-align:center"></div>
+    </div>
 
-  <div class="wsep" data-i18n="recentCalcs">Recent calculations</div>
-  <div id="savesList"></div>
+    <!-- RIGHT: Content -->
+    <div class="welcome-content-col">
+      <h2 style="margin-bottom:4px">Welcome 🏠</h2>
+      <div class="step-desc" style="margin-bottom:12px">Compare financing alternatives for Swedish properties — ägarlägenhet, bostadsrätt, and hus/villa.</div>
 
-  <div class="wsep" data-i18n="importExport">Import / Export</div>
-  <div class="file-row">
-    <button class="file-btn" onclick="document.getElementById('fileInput').click()" data-i18n="importJson">
-      📥 Import (.json)
-    </button>
-    <button class="file-btn" onclick="window.openDownloadModal()" data-i18n="exportJson">
-      📤 Export (.json)
-    </button>
-    <input type="file" id="fileInput" accept=".json" onchange="window.loadFromFile(event)">
-  </div>
-  <div style="font-size:11px;color:#aaa;margin-top:8px" data-i18n="importPrevious">Import previously downloaded calculation files or export your current work</div>
+      <div id="lastSessionBanner" style="display:none;margin-bottom:10px"></div>
 
-  <div style="margin-top:16px;padding-top:16px;border-top:1px solid #eee;font-size:11px;text-align:center">
-    <a href="methodology.html" target="_blank" style="color:#0070C0;text-decoration:none;font-weight:500" data-i18n="methodology">📖 Methodology &amp; formulas</a>
+      <div class="wsep" data-i18n="recentCalcs">Recent calculations</div>
+      <div id="savesList"></div>
+
+      <div class="wsep" data-i18n="importExport">Import / Export</div>
+      <div class="file-row">
+        <button class="file-btn" onclick="document.getElementById('fileInput').click()" data-i18n="importJson">
+          📥 Import (.json)
+        </button>
+        <button class="file-btn" onclick="window.openDownloadModal()" data-i18n="exportJson">
+          📤 Export (.json)
+        </button>
+        <input type="file" id="fileInput" accept=".json" onchange="window.loadFromFile(event)">
+      </div>
+      <div style="font-size:11px;color:#aaa;margin-top:8px" data-i18n="importPrevious">Import previously downloaded calculation files or export your current work</div>
+
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid #eee;font-size:11px;text-align:center">
+        <a href="methodology.html" target="_blank" style="color:#0070C0;text-decoration:none;font-weight:500" data-i18n="methodology">📖 Methodology &amp; formulas</a>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -839,13 +854,13 @@
 <!-- ══════════════════ COMPARE PAGE ══════════════════════════════ -->
 <div class="page" id="comparePage">
   <div class="main-hdr">
-    <h1>📊 <span>Property Comparison</span>
+    <h1>📊 <span data-i18n="cmpd_page_title">Property Comparison</span>
       <span id="cmp-count-sub"></span>
     </h1>
     <div class="hdr-btns">
-      <button class="hdr-btn" onclick="window.closeComparePage()">← Back to results</button>
-      <button class="hdr-btn accent" onclick="window.openCmpDialog()">📊 Change selection</button>
-      <button class="hdr-btn" onclick="window.clearCompare()">🗑 Clear all</button>
+      <button class="hdr-btn" onclick="window.closeComparePage()" data-i18n="cmpd_back">← Back to results</button>
+      <button class="hdr-btn accent" onclick="window.openCmpDialog()" data-i18n="cmpd_change">📊 Change selection</button>
+      <button class="hdr-btn" onclick="window.clearCompare()" data-i18n="cmpd_clear">🗑 Clear all</button>
     </div>
   </div>
   <div id="cmpContent"></div>
@@ -873,15 +888,15 @@
 <div class="cmpd-overlay hidden" id="cmpdOverlay">
   <div class="cmpd-card">
     <div class="cmpd-head">
-      <h2>📊 Select properties to compare</h2>
-      <p>Choose 2–4 properties. For properties with multiple financing alternatives, pick which one to compare.</p>
+      <h2 data-i18n="cmpd_dialog_title">📊 Select properties to compare</h2>
+      <p data-i18n="cmpd_dialog_desc">Choose 2–4 properties. For properties with multiple financing alternatives, pick which one to compare.</p>
     </div>
     <div class="cmpd-body" id="cmpdBody"></div>
     <div class="cmpd-foot">
       <span class="cmpd-count" id="cmpdCount">0 selected</span>
       <div class="cmpd-foot-btns">
-        <button class="cmpd-cancel" onclick="window.closeCmpDialog()">Cancel</button>
-        <button class="cmpd-go" id="cmpdGoBtn" onclick="window.confirmCmpDialog()" disabled>Compare</button>
+        <button class="cmpd-cancel" onclick="window.closeCmpDialog()" data-i18n="cmpd_cancel">Cancel</button>
+        <button class="cmpd-go" id="cmpdGoBtn" onclick="window.confirmCmpDialog()" disabled data-i18n="compare">Compare</button>
       </div>
     </div>
   </div>
@@ -930,7 +945,7 @@
 
 <div class="zoom-bar">
   <button onclick="window.applyZoom(window.uiZoom - 0.1)" title="Zoom out">−</button>
-  <span id="zoom-val">120%</span>
+  <span id="zoom-val">100%</span>
   <button onclick="window.applyZoom(window.uiZoom + 0.1)" title="Zoom in">+</button>
 </div>
 

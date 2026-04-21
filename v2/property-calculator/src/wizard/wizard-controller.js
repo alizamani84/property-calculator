@@ -105,6 +105,8 @@ export function openWizardForEditing() {
   originalStateSnapshot = appState.purchasePrice > 0 ? { ...appState } : null;
   prefillFormFromState();
   updateOneCostsPlaceholders();
+  // Always start at step 1 (property details) when editing — never the welcome screen
+  if (appState.currentStep === 0) appState.currentStep = 1;
   document.getElementById('wizOverlay').classList.remove('hidden');
   renderCurrentStep();
 }
@@ -139,6 +141,9 @@ export function renderCurrentStep() {
   if (closeButton) {
     closeButton.style.display = (originalStateSnapshot || appState.purchasePrice > 0) ? 'block' : 'none';
   }
+
+  // Wide card on welcome step, normal on wizard steps
+  document.querySelector('.wiz-card')?.classList.toggle('welcome-wide', step === 0);
 
   if (step === 0) {
     // Welcome step

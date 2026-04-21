@@ -266,19 +266,24 @@ function loadFromFile(event) {
 }
 
 // ── Zoom control ─────────────────────────────────────────────────────────────
-let uiZoom = parseFloat(localStorage.getItem('calc-zoom') || '1.2');
+const ZOOM_KEY  = 'calc-zoom-v2';
+const ZOOM_BASE = 1.5;  // 1.5× is displayed as "100%" — matches typical desktop at 100% browser zoom
+let uiZoom = parseFloat(localStorage.getItem(ZOOM_KEY) || String(ZOOM_BASE));
 
 /**
  * Apply zoom level to body element.
+ * Displayed percentage is relative to ZOOM_BASE (1.5× = 100%).
  *
  * @param {number} newZoom
  */
 function applyZoom(newZoom) {
-  uiZoom = Math.max(0.6, Math.min(2.0, Math.round(newZoom * 10) / 10));
+  uiZoom = Math.max(0.6, Math.min(2.5, Math.round(newZoom * 10) / 10));
   document.body.style.zoom = uiZoom;
-  localStorage.setItem('calc-zoom', uiZoom.toString());
+  // Compensate vh units inside zoomed body: --zvh = 1vh / zoom
+  document.documentElement.style.setProperty('--zvh', `${(1 / uiZoom).toFixed(4)}vh`);
+  localStorage.setItem(ZOOM_KEY, uiZoom.toString());
   const zoomVal = document.getElementById('zoom-val');
-  if (zoomVal) zoomVal.textContent = Math.round(uiZoom * 100) + '%';
+  if (zoomVal) zoomVal.textContent = Math.round((uiZoom / ZOOM_BASE) * 100) + '%';
 }
 
 // ── URL import ───────────────────────────────────────────────────────────────
