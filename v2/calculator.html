@@ -331,12 +331,12 @@ Stack: `+s.stack)}}function da(){const t=document.getElementById("linksBar");if(
   <h2>Property Details</h2>
   <div class="step-desc">Give this property a name and add listing links for easy reference.</div>
 
-  <!-- URL Import -->
-  <div class="url-import-box">
-    <div class="url-import-label">🔗 Import from listing URL <span class="opt">(Hemnet, Booli, broker)</span></div>
+  <!-- URL Import (disabled — feature not yet available) -->
+  <div class="url-import-box" style="opacity:0.5;pointer-events:none">
+    <div class="url-import-label">🔗 Import from listing URL <span class="opt">(Hemnet, Booli, broker)</span> <span style="font-size:10px;font-weight:600;background:#f0d080;color:#7a5500;border-radius:4px;padding:1px 6px;margin-left:4px">Coming soon</span></div>
     <div class="url-import-row">
-      <input type="url" id="url-import-input" placeholder="https://www.hemnet.se/bostad/…" autocomplete="off">
-      <button class="url-import-btn" onclick="window.importFromUrl()">Import</button>
+      <input type="url" id="url-import-input" placeholder="https://www.hemnet.se/bostad/…" autocomplete="off" disabled>
+      <button class="url-import-btn" disabled>Import</button>
     </div>
     <div class="url-import-status" id="url-import-status"></div>
   </div>

@@ -1,5 +1,7 @@
 # Swedish Property Investment Calculator
 
+[![Deploy](https://github.com/alizamani84/property-calculator/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/alizamani84/property-calculator/actions/workflows/pages/pages-build-deployment)
+
 A browser-based tool for analysing Swedish property investments. Compares up to three financing scenarios (e.g. new mortgage vs. top-up loans against an existing apartment), calculates monthly cash flow, rental income tax (schablonavdrag), ränteavdrag, and ROI — all using 2026 Swedish tax rules.
 
 Supports three property types: **ägarlägenhet**, **bostadsrätt**, and **hus/villa**.  
